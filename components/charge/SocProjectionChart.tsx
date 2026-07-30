@@ -105,7 +105,8 @@ export function SocProjectionChart({
             dataKey="soc"
             name="soc"
             stroke="var(--color-accent)"
-            strokeWidth={2.5}
+            strokeWidth={4}
+            strokeLinecap="round"
             dot={false}
             isAnimationActive={false}
           />
@@ -115,7 +116,8 @@ export function SocProjectionChart({
               dataKey="projectedSoc"
               name="projectedSoc"
               stroke="var(--color-accent-text)"
-              strokeWidth={2}
+              strokeWidth={2.5}
+              strokeLinecap="round"
               strokeDasharray="6 4"
               dot={false}
               isAnimationActive={false}

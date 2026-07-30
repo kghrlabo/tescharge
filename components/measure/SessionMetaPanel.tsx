@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { chargerRepository, settingsRepository } from "@/lib/db/repositories";
 import { classifyLocation } from "@/lib/location/classify";
 import { milesToKm, formatDateTime } from "@/lib/format";
+import { SnowflakeIcon } from "@/components/ui/icons";
 import type { Charger } from "@/lib/db/models";
 import type { ChargeStatusPayload } from "@/lib/tesla/types";
 import type { LocationOverride } from "@/lib/polling/chargeStateMachine";
@@ -22,10 +23,14 @@ export function SessionMetaPanel({
   startPayload,
   locationOverride,
   onLocationChange,
+  precon,
+  onPreconChange,
 }: {
   startPayload: ChargeStatusPayload;
   locationOverride: LocationOverride | null;
   onLocationChange: (value: LocationOverride | null) => void;
+  precon: boolean;
+  onPreconChange: (value: boolean) => void;
 }) {
   const [chargers, setChargers] = useState<Charger[]>([]);
   const [autoLocationLabel, setAutoLocationLabel] = useState("判定中...");
@@ -66,21 +71,50 @@ export function SessionMetaPanel({
   return (
     <div className="mt-4 flex flex-col gap-4 border-t border-hairline pt-4 text-sm">
       <p className="text-[11px] font-semibold tracking-wide text-ink-faint uppercase">詳細情報</p>
-      <div className="flex justify-between border-b border-hairline pb-2">
-        <span className="text-ink-dim">開始時刻</span>
-        <span className="font-medium text-ink">{formatDateTime(startPayload.timestamp)}</span>
-      </div>
-      <div className="flex justify-between border-b border-hairline pb-2">
-        <span className="text-ink-dim">走行距離</span>
-        <span className="font-medium text-ink">
-          {Math.round(milesToKm(startPayload.odometerMiles))} km
-        </span>
-      </div>
-      <div className="flex justify-between border-b border-hairline pb-2">
-        <span className="text-ink-dim">外気温（開始）</span>
-        <span className="font-medium text-ink">
-          {startPayload.outsideTempC != null ? `${startPayload.outsideTempC}℃` : "-"}
-        </span>
+
+      <div className="grid grid-cols-1 gap-x-4 gap-y-3 lg:grid-cols-2">
+        <div className="flex justify-between border-b border-hairline pb-2">
+          <span className="text-ink-dim">開始時刻</span>
+          <span className="font-medium text-ink">{formatDateTime(startPayload.timestamp)}</span>
+        </div>
+        <div className="flex justify-between border-b border-hairline pb-2">
+          <span className="text-ink-dim">走行距離</span>
+          <span className="font-medium text-ink">
+            {Math.round(milesToKm(startPayload.odometerMiles))} km
+          </span>
+        </div>
+        <div className="flex justify-between border-b border-hairline pb-2">
+          <span className="text-ink-dim">外気温（開始）</span>
+          <span className="font-medium text-ink">
+            {startPayload.outsideTempC != null ? `${startPayload.outsideTempC}℃` : "-"}
+          </span>
+        </div>
+        <div className="flex items-center justify-between border-b border-hairline pb-2">
+          <span className="flex items-center gap-1.5 text-ink-dim">
+            <SnowflakeIcon className="h-3.5 w-3.5" />
+            プレコンディショニング
+          </span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={precon}
+            aria-label="プレコンディショニングを実施した"
+            onClick={() => onPreconChange(!precon)}
+            className="flex min-h-8 min-w-11 shrink-0 items-center justify-center"
+          >
+            <span
+              className={`relative h-6 w-10 rounded-full transition-colors ${
+                precon ? "bg-accent" : "bg-surface-raised border border-hairline"
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 block h-5 w-5 rounded-full bg-white transition-transform ${
+                  precon ? "translate-x-4" : ""
+                }`}
+              />
+            </span>
+          </button>
+        </div>
       </div>
 
       <div>

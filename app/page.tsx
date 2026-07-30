@@ -119,11 +119,7 @@ export default function HomePage() {
       </Card>
 
       <div>
-        <Button
-          onClick={handleStart}
-          disabled={starting || isMeasuring}
-          className="w-full py-4 text-base"
-        >
+        <Button onClick={handleStart} disabled={starting || isMeasuring} className="w-full">
           {isMeasuring ? "計測中..." : starting ? "開始中..." : "計測開始"}
         </Button>
         {startError && (

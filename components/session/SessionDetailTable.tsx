@@ -10,7 +10,7 @@ const LOCATION_LABEL: Record<string, string> = {
 
 function Row({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="flex justify-between border-b border-hairline pb-2 text-sm last:border-0 last:pb-0">
+    <div className="flex justify-between border-b border-hairline pb-2 text-sm">
       <span className="text-ink-dim">{label}</span>
       <span className="font-medium text-ink">{value}</span>
     </div>
@@ -37,27 +37,29 @@ export function SessionDetailTable({
   return (
     <div className="mt-4 flex flex-col gap-4 border-t border-hairline pt-4">
       <p className="text-[11px] font-semibold tracking-wide text-ink-faint uppercase">詳細情報</p>
-      <Row label="開始時刻" value={formatDateTime(session.startedAt)} />
-      <Row label="終了時刻" value={session.endedAt ? formatDateTime(session.endedAt) : "-"} />
-      <Row label="場所 / 充電器" value={locationLabel} />
-      <Row label="AC/DC" value={session.acOrDc ?? "-"} />
-      <Row
-        label="プレコン有無"
-        value={session.preconditioned === null ? "-" : session.preconditioned ? "あり" : "なし"}
-      />
-      <Row label="最大充電速度" value={session.maxKw != null ? formatKw(session.maxKw) : "-"} />
-      <Row
-        label="走行距離"
-        value={session.startOdometerKm != null ? `${Math.round(session.startOdometerKm)} km` : "-"}
-      />
-      <Row
-        label="外気温（開始/終了）"
-        value={
-          session.startOutsideTempC != null
-            ? `${session.startOutsideTempC}℃ / ${session.endOutsideTempC ?? "-"}℃`
-            : "-"
-        }
-      />
+      <div className="grid grid-cols-1 gap-x-4 gap-y-3 lg:grid-cols-2">
+        <Row label="開始時刻" value={formatDateTime(session.startedAt)} />
+        <Row label="終了時刻" value={session.endedAt ? formatDateTime(session.endedAt) : "-"} />
+        <Row label="場所 / 充電器" value={locationLabel} />
+        <Row label="AC/DC" value={session.acOrDc ?? "-"} />
+        <Row
+          label="プレコン有無"
+          value={session.preconditioned === null ? "-" : session.preconditioned ? "あり" : "なし"}
+        />
+        <Row label="最大充電速度" value={session.maxKw != null ? formatKw(session.maxKw) : "-"} />
+        <Row
+          label="走行距離"
+          value={session.startOdometerKm != null ? `${Math.round(session.startOdometerKm)} km` : "-"}
+        />
+        <Row
+          label="外気温（開始/終了）"
+          value={
+            session.startOutsideTempC != null
+              ? `${session.startOutsideTempC}℃ / ${session.endOutsideTempC ?? "-"}℃`
+              : "-"
+          }
+        />
+      </div>
     </div>
   );
 }

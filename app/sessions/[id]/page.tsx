@@ -60,7 +60,7 @@ export default function SessionDetailPage({
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[300px_1fr] lg:items-start">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[260px_1fr] lg:items-start">
         <SessionStatsPanel session={session} charger={charger} />
 
         <ChargeChartsGrid

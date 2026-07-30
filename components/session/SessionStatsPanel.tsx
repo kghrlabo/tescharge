@@ -18,6 +18,7 @@ export function SessionStatsPanel({
   return (
     <StatsRingPanel
       soc={session.endSoc ?? session.startSoc}
+      startSoc={session.startSoc}
       complete
       ringSubLabel={`${session.startSoc}% → ${session.endSoc != null ? `${session.endSoc}%` : "-"}`}
       tiles={[

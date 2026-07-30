@@ -71,7 +71,8 @@ export function TimeSeriesLineChart({
             name={s.label}
             stroke={s.color}
             dot={false}
-            strokeWidth={2}
+            strokeWidth={4}
+            strokeLinecap="round"
             isAnimationActive={false}
           />
         ))}

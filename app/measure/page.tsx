@@ -3,11 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useChargeSession } from "@/lib/polling/ChargeSessionContext";
-import { CableWaitingView } from "@/components/measure/CableWaitingView";
 import { ChargeStatusBar } from "@/components/measure/ChargeStatusBar";
 import { LiveStatsPanel } from "@/components/measure/LiveStatsPanel";
-import { SessionMetaPanel } from "@/components/measure/SessionMetaPanel";
-import { PreconToggle } from "@/components/measure/PreconToggle";
 import { ChargeChartsGrid } from "@/components/charts/ChargeChartsGrid";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -78,21 +75,8 @@ export default function MeasurePage() {
     router.push("/");
   };
 
-  if (state.status === "waitingForCable") {
-    return (
-      <CableWaitingView
-        soc={state.startPayload.soc}
-        precon={state.precon}
-        onPreconChange={togglePrecon}
-        onCancel={handleCancel}
-        errorMessage={state.consecutiveErrors >= 3 ? state.lastErrorMessage : null}
-        showFakeConnectButton={useFakeTeslaApi}
-        onFakeConnectCable={handleFakeConnectCable}
-      />
-    );
-  }
-
-  const latest = state.logPoints[state.logPoints.length - 1];
+  const isWaiting = state.status === "waitingForCable";
+  const latest = state.status === "charging" ? state.logPoints[state.logPoints.length - 1] : null;
 
   return (
     <div className="mx-auto flex w-full max-w-[1680px] flex-col gap-3">
@@ -103,29 +87,40 @@ export default function MeasurePage() {
         </p>
       )}
 
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[300px_1fr] lg:items-start">
-        <div className="flex flex-col gap-3">
-          <LiveStatsPanel latest={latest}>
-            <SessionMetaPanel
-              startPayload={state.startPayload}
-              locationOverride={state.locationOverride}
-              onLocationChange={changeLocationOverride}
-            />
-          </LiveStatsPanel>
-          <PreconToggle value={state.precon} onChange={togglePrecon} />
-        </div>
-
-        <ChargeChartsGrid
-          logPoints={state.logPoints}
-          minutesToFull={latest.minutesToFull}
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[260px_1fr] lg:items-start">
+        <LiveStatsPanel
+          latest={latest}
+          startPayload={state.startPayload}
           precon={state.precon}
-          fastChargerPresent={state.startPayload.fastChargerPresent}
+          onPreconChange={togglePrecon}
+          locationOverride={state.locationOverride}
+          onLocationChange={changeLocationOverride}
         />
+
+        {isWaiting ? (
+          <Card className="flex flex-1 flex-col items-center justify-center gap-3 py-12 text-center text-sm text-ink-faint">
+            <p>ケーブル接続を待っています…</p>
+            {useFakeTeslaApi && (
+              <Button variant="secondary" onClick={handleFakeConnectCable}>
+                （開発用）ケーブル接続をシミュレート
+              </Button>
+            )}
+          </Card>
+        ) : (
+          <ChargeChartsGrid
+            logPoints={state.logPoints}
+            minutesToFull={latest!.minutesToFull}
+            precon={state.precon}
+            fastChargerPresent={state.startPayload.fastChargerPresent}
+          />
+        )}
       </div>
 
-      <p className="text-center text-xs text-ink-faint">計測中はこのタブを閉じないでください</p>
+      {!isWaiting && (
+        <p className="text-center text-xs text-ink-faint">計測中はこのタブを閉じないでください</p>
+      )}
       <Button variant="secondary" onClick={handleCancel}>
-        計測を中止
+        {isWaiting ? "計測をキャンセル" : "計測を中止"}
       </Button>
     </div>
   );
