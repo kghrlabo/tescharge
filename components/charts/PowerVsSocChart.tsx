@@ -30,7 +30,7 @@ export function PowerVsSocChart({
 
   if (data.length === 0) {
     return (
-      <div className="flex items-center justify-center text-sm text-zinc-400" style={{ height }}>
+      <div className="flex items-center justify-center text-sm text-ink-faint" style={{ height }}>
         データがありません
       </div>
     );
@@ -39,10 +39,24 @@ export function PowerVsSocChart({
   return (
     <ResponsiveContainer width="100%" height={height}>
       <LineChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
-        <CartesianGrid strokeDasharray="3 3" className="stroke-zinc-200 dark:stroke-zinc-800" />
-        <XAxis dataKey="soc" type="number" domain={[0, 100]} unit="%" tick={{ fontSize: 12 }} />
-        <YAxis tick={{ fontSize: 12 }} unit="kW" />
-        <Tooltip />
+        <CartesianGrid strokeDasharray="3 3" className="stroke-hairline" />
+        <XAxis
+          dataKey="soc"
+          type="number"
+          domain={[0, 100]}
+          unit="%"
+          tick={{ fontSize: 11, fill: "var(--color-ink-faint)" }}
+        />
+        <YAxis unit="kW" tick={{ fontSize: 11, fill: "var(--color-ink-faint)" }} width={36} />
+        <Tooltip
+          contentStyle={{
+            background: "var(--color-surface-raised)",
+            border: "1px solid var(--color-hairline)",
+            borderRadius: 10,
+            fontSize: 12,
+          }}
+          labelStyle={{ color: "var(--color-ink-dim)" }}
+        />
         <Line
           type="monotone"
           dataKey="kw"

@@ -37,12 +37,12 @@ export function HomeLocationField({
   };
 
   const inputClass =
-    "mt-1 w-full rounded-lg border border-zinc-300 px-2 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900";
+    "mt-1 min-h-11 w-full rounded-chip border border-hairline bg-surface-raised px-2 py-1.5 text-sm text-ink";
 
   return (
     <div className="flex flex-col gap-3">
       <div className="grid grid-cols-2 gap-2">
-        <label className="text-xs text-zinc-500">
+        <label className="text-xs text-ink-faint">
           緯度
           <input
             type="number"
@@ -54,7 +54,7 @@ export function HomeLocationField({
             className={inputClass}
           />
         </label>
-        <label className="text-xs text-zinc-500">
+        <label className="text-xs text-ink-faint">
           経度
           <input
             type="number"
@@ -67,7 +67,7 @@ export function HomeLocationField({
           />
         </label>
       </div>
-      <label className="text-xs text-zinc-500">
+      <label className="text-xs text-ink-faint">
         判定半径 (m)
         <input
           type="number"
@@ -79,7 +79,7 @@ export function HomeLocationField({
       <Button type="button" variant="secondary" onClick={useCurrentLocation} className="self-start">
         現在地を使用
       </Button>
-      {geoError && <p className="text-xs text-red-600">{geoError}</p>}
+      {geoError && <p className="text-xs text-danger">{geoError}</p>}
     </div>
   );
 }

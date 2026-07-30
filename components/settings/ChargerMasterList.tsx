@@ -6,7 +6,7 @@ import type { Charger } from "@/lib/db/models";
 import type { ChargerInput } from "@/lib/db/repositories/ChargerRepository";
 
 const inputClass =
-  "rounded-lg border border-zinc-300 px-2 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900";
+  "min-h-11 rounded-chip border border-hairline bg-surface-raised px-2 py-1.5 text-sm text-ink";
 
 export function ChargerMasterList({
   chargers,
@@ -61,24 +61,24 @@ export function ChargerMasterList({
       {chargers.map((c) => (
         <div
           key={c.id}
-          className="flex items-center justify-between rounded-lg border border-zinc-200 p-2 text-sm dark:border-zinc-800"
+          className="flex items-center justify-between rounded-chip border border-hairline p-2 text-sm"
         >
           <div>
-            <p className="font-medium">{c.name}</p>
-            <p className="text-xs text-zinc-500">
+            <p className="font-medium text-ink">{c.name}</p>
+            <p className="text-xs text-ink-faint">
               {c.type} / 最大{c.maxKw}kW
             </p>
           </div>
           <button
             type="button"
             onClick={() => onDelete(c.id)}
-            className="text-xs text-red-600 hover:underline"
+            className="text-xs text-danger hover:underline"
           >
             削除
           </button>
         </div>
       ))}
-      <div className="grid grid-cols-2 gap-2 rounded-lg border border-dashed border-zinc-300 p-3 dark:border-zinc-700">
+      <div className="grid grid-cols-2 gap-2 rounded-chip border border-dashed border-hairline p-3">
         <input
           placeholder="名称"
           value={name}
@@ -119,7 +119,7 @@ export function ChargerMasterList({
         >
           現在地を使用
         </Button>
-        {geoError && <p className="col-span-2 text-xs text-red-600">{geoError}</p>}
+        {geoError && <p className="col-span-2 text-xs text-danger">{geoError}</p>}
         <Button type="button" variant="secondary" onClick={handleAdd} className="col-span-2">
           追加
         </Button>

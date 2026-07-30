@@ -24,11 +24,15 @@ export function SocProjectionChart({
   minutesToFull,
   precon,
   fastChargerPresent,
+  live = true,
 }: {
   logPoints: LogPointDraft[];
   minutesToFull: number;
   precon: boolean;
   fastChargerPresent: boolean;
+  /** False for a finished, historical session — hides the "現在" (now) marker,
+   * which only makes sense while a charge is actually in progress. */
+  live?: boolean;
 }) {
   const { rows: data, method } = toSocProjectionRows(logPoints, minutesToFull, {
     precon,
@@ -88,7 +92,7 @@ export function SocProjectionChart({
             strokeDasharray="4 4"
             label={{ value: "90%", position: "right", fontSize: 11, fill: "var(--color-ink-faint)" }}
           />
-          {latest && (
+          {live && latest && (
             <ReferenceLine
               x={latest.timestamp}
               stroke="var(--color-accent-text)"

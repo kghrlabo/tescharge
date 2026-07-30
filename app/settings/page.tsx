@@ -26,11 +26,11 @@ function ConnectionBanner() {
   if (!error && !connected) return null;
 
   return error ? (
-    <p className="rounded-lg bg-red-100 p-3 text-sm text-red-700 dark:bg-red-900/40 dark:text-red-200">
+    <p className="rounded-card bg-danger/15 p-3 text-sm text-danger">
       接続でエラーが発生しました（{error}）
     </p>
   ) : (
-    <p className="rounded-lg bg-green-100 p-3 text-sm text-green-700 dark:bg-green-900/40 dark:text-green-200">
+    <p className="rounded-card bg-glow/15 p-3 text-sm text-glow-text">
       Teslaアカウントと連携しました
     </p>
   );
@@ -71,22 +71,22 @@ export default function SettingsPage() {
   };
 
   if (!authStatus || !settings) {
-    return <p className="text-zinc-500">読み込み中...</p>;
+    return <p className="text-ink-faint">読み込み中...</p>;
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-bold">設定</h1>
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+      <h1 className="text-xl font-bold text-ink">設定</h1>
 
       <Suspense fallback={null}>
         <ConnectionBanner />
       </Suspense>
 
       <Card>
-        <h2 className="text-sm font-semibold">Tesla認証</h2>
+        <h2 className="text-sm font-semibold text-ink">Tesla認証</h2>
         {authStatus.connected ? (
           <div className="mt-2 flex items-center justify-between">
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="text-sm text-ink-dim">
               {authStatus.vehicleName} と連携中
             </p>
             <Button variant="secondary" onClick={handleDisconnect} className="px-3 py-1.5 text-xs">
@@ -99,7 +99,7 @@ export default function SettingsPage() {
               <select
                 value={scenario}
                 onChange={(e) => setScenario(e.target.value)}
-                className="rounded-lg border border-zinc-300 px-2 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                className="min-h-11 rounded-chip border border-hairline bg-surface-raised px-2 py-1.5 text-sm text-ink"
               >
                 <option value="">開発用シナリオ: デフォルト</option>
                 {authStatus.fakeScenarios.map((s) => (
@@ -117,7 +117,7 @@ export default function SettingsPage() {
       </Card>
 
       <Card>
-        <h2 className="text-sm font-semibold">API更新間隔</h2>
+        <h2 className="text-sm font-semibold text-ink">API更新間隔</h2>
         <div className="mt-2">
           <PollIntervalSelect
             value={settings.pollIntervalSec}
@@ -127,20 +127,20 @@ export default function SettingsPage() {
       </Card>
 
       <Card>
-        <h2 className="text-sm font-semibold">保存期間</h2>
+        <h2 className="text-sm font-semibold text-ink">保存期間</h2>
         <div className="mt-2 flex items-center gap-2">
           <input
             type="number"
             value={settings.retentionDays}
             onChange={(e) => updateSettings({ retentionDays: Number(e.target.value) })}
-            className="w-32 rounded-lg border border-zinc-300 px-2 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+            className="min-h-11 w-32 rounded-chip border border-hairline bg-surface-raised px-2 py-1.5 text-sm text-ink"
           />
-          <span className="text-sm text-zinc-500">日</span>
+          <span className="text-sm text-ink-faint">日</span>
         </div>
       </Card>
 
       <Card>
-        <h2 className="text-sm font-semibold">電気料金</h2>
+        <h2 className="text-sm font-semibold text-ink">電気料金</h2>
         <div className="mt-2 flex items-center gap-2">
           <input
             type="number"
@@ -150,14 +150,14 @@ export default function SettingsPage() {
                 electricityRatePerKwh: e.target.value === "" ? null : Number(e.target.value),
               })
             }
-            className="w-32 rounded-lg border border-zinc-300 px-2 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+            className="min-h-11 w-32 rounded-chip border border-hairline bg-surface-raised px-2 py-1.5 text-sm text-ink"
           />
-          <span className="text-sm text-zinc-500">円/kWh</span>
+          <span className="text-sm text-ink-faint">円/kWh</span>
         </div>
       </Card>
 
       <Card>
-        <h2 className="text-sm font-semibold">自宅位置</h2>
+        <h2 className="text-sm font-semibold text-ink">自宅位置</h2>
         <div className="mt-2">
           <HomeLocationField
             lat={settings.homeLat}
@@ -169,7 +169,7 @@ export default function SettingsPage() {
       </Card>
 
       <Card>
-        <h2 className="text-sm font-semibold">充電器名称（マスタ）</h2>
+        <h2 className="text-sm font-semibold text-ink">充電器名称（マスタ）</h2>
         <div className="mt-2">
           <ChargerMasterList
             chargers={chargers}
@@ -180,16 +180,16 @@ export default function SettingsPage() {
       </Card>
 
       <Card>
-        <h2 className="text-sm font-semibold">プレコンディショニング</h2>
+        <h2 className="text-sm font-semibold text-ink">プレコンディショニング</h2>
         <div className="mt-2 flex items-center justify-between text-sm">
-          <span>計測開始時のデフォルト値</span>
+          <span className="text-ink-dim">計測開始時のデフォルト値</span>
           <button
             type="button"
             onClick={() => updateSettings({ preconDefault: !settings.preconDefault })}
             className={`rounded-full px-3 py-1 text-xs font-medium ${
               settings.preconDefault
                 ? "bg-accent text-white"
-                : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
+                : "bg-surface-raised text-ink-dim border border-hairline"
             }`}
           >
             {settings.preconDefault ? "あり" : "なし"}

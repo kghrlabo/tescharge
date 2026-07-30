@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
-import { Card } from "@/components/ui/Card";
-import { ChargeRing } from "@/components/charge/ChargeRing";
+import { StatsRingPanel } from "@/components/charge/StatsRingPanel";
 import { PortStatusBadge } from "@/components/charge/PortStatusBadge";
 import { formatDurationMinutes, formatTime } from "@/lib/format";
 import type { LogPointDraft } from "@/lib/polling/chargeStateMachine";
@@ -28,41 +27,20 @@ export function LiveStatsPanel({
   const isCharging = latest.chargingState === "Charging";
 
   return (
-    <Card radius="rounded-hero">
-      <div className="flex flex-col items-center gap-3">
-        <ChargeRing
-          soc={latest.soc}
-          charging={isCharging}
-          complete={isComplete}
-          subLabel={RING_STATE_LABEL[latest.chargingState] ?? "充電中"}
-          size={188}
-        />
-        <PortStatusBadge chargingState={latest.chargingState} />
-
-        <div className="grid w-full grid-cols-3 gap-2 text-center">
-          <div>
-            <p className="text-lg font-semibold tabular-nums text-ink">
-              {etaMs ? formatTime(etaMs) : "-"}
-            </p>
-            <p className="text-[11px] tracking-wide text-ink-faint uppercase">推定終了</p>
-          </div>
-          <div>
-            <p className="text-lg font-semibold tabular-nums text-ink">
-              {latest.chargerPowerKw.toFixed(1)}
-            </p>
-            <p className="text-[11px] tracking-wide text-ink-faint uppercase">充電速度 kW</p>
-          </div>
-          <div>
-            <p className="text-lg font-semibold tabular-nums text-ink">
-              {latest.energyAddedKwh.toFixed(1)}
-            </p>
-            <p className="text-[11px] tracking-wide text-ink-faint uppercase">追加電力量 kWh</p>
-          </div>
-        </div>
-
-        <p className="text-xs text-ink-faint">経過時間 {formatDurationMinutes(elapsedMinutes)}</p>
-      </div>
+    <StatsRingPanel
+      soc={latest.soc}
+      charging={isCharging}
+      complete={isComplete}
+      ringSubLabel={RING_STATE_LABEL[latest.chargingState] ?? "充電中"}
+      badge={<PortStatusBadge chargingState={latest.chargingState} />}
+      tiles={[
+        { value: etaMs ? formatTime(etaMs) : "-", label: "推定終了" },
+        { value: latest.chargerPowerKw.toFixed(1), label: "充電速度 kW" },
+        { value: latest.energyAddedKwh.toFixed(1), label: "追加電力量 kWh" },
+      ]}
+      footer={<p className="text-xs text-ink-faint">経過時間 {formatDurationMinutes(elapsedMinutes)}</p>}
+    >
       {children}
-    </Card>
+    </StatsRingPanel>
   );
 }

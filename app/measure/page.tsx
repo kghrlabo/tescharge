@@ -8,8 +8,7 @@ import { ChargeStatusBar } from "@/components/measure/ChargeStatusBar";
 import { LiveStatsPanel } from "@/components/measure/LiveStatsPanel";
 import { SessionMetaPanel } from "@/components/measure/SessionMetaPanel";
 import { PreconToggle } from "@/components/measure/PreconToggle";
-import { ChargeChartsMultiView } from "@/components/charts/ChargeChartsMultiView";
-import { SocProjectionChart } from "@/components/charge/SocProjectionChart";
+import { ChargeChartsGrid } from "@/components/charts/ChargeChartsGrid";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 
@@ -53,7 +52,7 @@ export default function MeasurePage() {
 
   if (state.status === "finished") {
     return (
-      <Card className="text-center">
+      <Card className="mx-auto w-full max-w-lg text-center">
         <p className="text-lg font-semibold text-ink">計測が完了しました</p>
         <p className="mt-2 text-sm text-ink-dim">
           {state.summary.endSoc}% まで充電（{state.summary.totalKwhAdded.toFixed(1)} kWh）
@@ -96,7 +95,7 @@ export default function MeasurePage() {
   const latest = state.logPoints[state.logPoints.length - 1];
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="mx-auto flex w-full max-w-[1680px] flex-col gap-3">
       <ChargeStatusBar vehicleName={vehicleName} outsideTempC={state.startPayload.outsideTempC} />
       {state.consecutiveErrors >= 3 && (
         <p className="rounded-card bg-warn/15 p-3 text-sm text-warn">
@@ -104,7 +103,7 @@ export default function MeasurePage() {
         </p>
       )}
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-[280px_1fr] md:items-start">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[300px_1fr] lg:items-start">
         <div className="flex flex-col gap-3">
           <LiveStatsPanel latest={latest}>
             <SessionMetaPanel
@@ -116,18 +115,12 @@ export default function MeasurePage() {
           <PreconToggle value={state.precon} onChange={togglePrecon} />
         </div>
 
-        <div className="flex flex-col gap-3">
-          <Card padding="p-3">
-            <p className="mb-1 text-xs font-semibold text-ink-dim">SOC推移</p>
-            <SocProjectionChart
-              logPoints={state.logPoints}
-              minutesToFull={latest.minutesToFull}
-              precon={state.precon}
-              fastChargerPresent={state.startPayload.fastChargerPresent}
-            />
-          </Card>
-          <ChargeChartsMultiView logPoints={state.logPoints} />
-        </div>
+        <ChargeChartsGrid
+          logPoints={state.logPoints}
+          minutesToFull={latest.minutesToFull}
+          precon={state.precon}
+          fastChargerPresent={state.startPayload.fastChargerPresent}
+        />
       </div>
 
       <p className="text-center text-xs text-ink-faint">計測中はこのタブを閉じないでください</p>

@@ -81,6 +81,14 @@ export function SnowflakeIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function ChevronRightIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base} {...props}>
+      <path d="m9 5 7 7-7 7" />
+    </svg>
+  );
+}
+
 export function CalendarClockIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...base} {...props}>

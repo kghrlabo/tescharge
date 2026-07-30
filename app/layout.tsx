@@ -32,7 +32,7 @@ export default function RootLayout({
       <body className="flex min-h-full flex-col bg-void text-ink">
         <ChargeSessionProvider>
           <NavBar />
-          <main className="mx-auto w-full max-w-3xl flex-1 px-4 pt-6 pb-24">{children}</main>
+          <main className="w-full flex-1 px-4 pt-6 pb-24 sm:px-6">{children}</main>
         </ChargeSessionProvider>
       </body>
     </html>

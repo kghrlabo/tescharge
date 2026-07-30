@@ -14,10 +14,10 @@ export function PollIntervalSelect({
           key={sec}
           type="button"
           onClick={() => onChange(sec)}
-          className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+          className={`min-h-11 rounded-chip px-4 py-2 text-sm font-medium transition-colors ${
             value === sec
               ? "bg-accent text-white"
-              : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+              : "bg-surface-raised text-ink-dim border border-hairline hover:bg-hairline"
           }`}
         >
           {sec}秒

@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { formatDate, formatKwh, formatDurationMinutes } from "@/lib/format";
+import { formatDate, formatDurationMinutes, formatTime } from "@/lib/format";
+import { ChevronRightIcon } from "@/components/ui/icons";
+import { SessionSocBar } from "./SessionSocBar";
 import type { ChargeSession } from "@/lib/db/models";
 
 const LOCATION_LABEL: Record<string, string> = {
@@ -7,6 +9,15 @@ const LOCATION_LABEL: Record<string, string> = {
   charger: "充電器",
   other: "その他",
 };
+
+function Stat({ value, label }: { value: string; label: string }) {
+  return (
+    <div>
+      <p className="text-sm font-semibold tabular-nums text-ink">{value}</p>
+      <p className="text-[10px] tracking-wide text-ink-faint uppercase">{label}</p>
+    </div>
+  );
+}
 
 export function SessionListItem({
   session,
@@ -23,21 +34,41 @@ export function SessionListItem({
   return (
     <Link
       href={`/sessions/${session.id}`}
-      className="block rounded-xl border border-zinc-200 p-4 transition-colors hover:border-accent dark:border-zinc-800"
+      className="group flex flex-col gap-3 rounded-card border border-hairline bg-surface p-4 transition-colors hover:border-accent sm:flex-row sm:items-center sm:gap-6"
     >
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-zinc-500">{formatDate(session.startedAt)}</span>
-        <span className="text-xs text-zinc-400">{locationLabel}</span>
-      </div>
-      <p className="mt-1 text-lg font-bold">
-        {session.startSoc}→{session.endSoc}%
-      </p>
-      <div className="mt-1 flex gap-4 text-sm text-zinc-600 dark:text-zinc-400">
-        <span>{session.totalKwhAdded != null ? formatKwh(session.totalKwhAdded) : "-"}</span>
-        <span>
-          {session.durationMinutes != null ? formatDurationMinutes(session.durationMinutes) : "-"}
+      <div className="flex items-center justify-between gap-3 sm:w-32 sm:flex-none sm:flex-col sm:items-start sm:gap-1">
+        <div>
+          <p className="text-sm font-semibold text-ink">{formatDate(session.startedAt)}</p>
+          <p className="text-xs text-ink-faint">{formatTime(session.startedAt)}</p>
+        </div>
+        <span className="rounded-chip bg-surface-raised px-2 py-0.5 text-[11px] font-medium text-ink-dim">
+          {locationLabel}
         </span>
       </div>
+
+      <div className="flex-1">
+        <div className="mb-1.5 flex items-baseline justify-between text-sm">
+          <span className="font-semibold tabular-nums text-ink">
+            {session.startSoc}% <span className="text-ink-faint">→</span>{" "}
+            {session.endSoc != null ? `${session.endSoc}%` : "-"}
+          </span>
+          {session.acOrDc && (
+            <span className="text-[11px] font-medium text-ink-faint">{session.acOrDc}</span>
+          )}
+        </div>
+        <SessionSocBar startSoc={session.startSoc} endSoc={session.endSoc} />
+      </div>
+
+      <div className="grid grid-cols-3 gap-4 sm:w-48 sm:flex-none sm:gap-4">
+        <Stat value={session.totalKwhAdded != null ? session.totalKwhAdded.toFixed(1) : "-"} label="kWh" />
+        <Stat value={session.avgKw != null ? session.avgKw.toFixed(1) : "-"} label="平均kW" />
+        <Stat
+          value={session.durationMinutes != null ? formatDurationMinutes(session.durationMinutes) : "-"}
+          label="時間"
+        />
+      </div>
+
+      <ChevronRightIcon className="hidden h-4 w-4 shrink-0 text-ink-faint transition-colors group-hover:text-accent-text sm:block" />
     </Link>
   );
 }

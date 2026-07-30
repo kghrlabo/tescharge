@@ -4,9 +4,8 @@ import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { chargeSessionRepository, chargerRepository } from "@/lib/db/repositories";
 import type { ChargeSession, Charger, LogPoint } from "@/lib/db/models";
-import { SessionDetailTable } from "@/components/session/SessionDetailTable";
-import { ChargeChartTabs } from "@/components/charts/ChargeChartTabs";
-import { Card } from "@/components/ui/Card";
+import { SessionStatsPanel } from "@/components/session/SessionStatsPanel";
+import { ChargeChartsGrid } from "@/components/charts/ChargeChartsGrid";
 import { Button } from "@/components/ui/Button";
 
 export default function SessionDetailPage({
@@ -47,11 +46,11 @@ export default function SessionDetailPage({
     window.location.href = "/sessions";
   };
 
-  if (session === undefined) return <p className="text-zinc-500">読み込み中...</p>;
-  if (session === null) return <p className="text-zinc-500">セッションが見つかりません。</p>;
+  if (session === undefined) return <p className="text-ink-faint">読み込み中...</p>;
+  if (session === null) return <p className="text-ink-faint">セッションが見つかりません。</p>;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="mx-auto flex w-full max-w-[1680px] flex-col gap-3">
       <div className="flex items-center justify-between">
         <Link href="/sessions" className="text-sm text-accent-text hover:underline">
           ← セッション一覧
@@ -61,13 +60,17 @@ export default function SessionDetailPage({
         </Button>
       </div>
 
-      <Card>
-        <SessionDetailTable session={session} charger={charger} />
-      </Card>
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[300px_1fr] lg:items-start">
+        <SessionStatsPanel session={session} charger={charger} />
 
-      <Card>
-        <ChargeChartTabs logPoints={logPoints} />
-      </Card>
+        <ChargeChartsGrid
+          logPoints={logPoints}
+          minutesToFull={0}
+          precon={session.preconditioned ?? false}
+          fastChargerPresent={Boolean(session.fastChargerType) || session.acOrDc === "DC"}
+          live={false}
+        />
+      </div>
     </div>
   );
 }

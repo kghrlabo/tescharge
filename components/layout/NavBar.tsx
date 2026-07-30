@@ -27,7 +27,7 @@ export function NavBar() {
             計測中です — タップして計測画面に戻る
           </Link>
         )}
-        <div className="mx-auto flex max-w-3xl items-center px-4 py-3">
+        <div className="mx-auto flex w-full max-w-[1680px] items-center px-4 py-3 sm:px-6">
           <span className="text-sm font-semibold tracking-tight text-ink">
             Charge Monitor
           </span>
@@ -38,7 +38,7 @@ export function NavBar() {
         className="fixed inset-x-0 bottom-0 z-10 border-t border-hairline bg-surface/95 backdrop-blur"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
-        <div className="mx-auto flex max-w-3xl items-stretch justify-around px-2 py-2">
+        <div className="mx-auto flex w-full max-w-[1680px] items-stretch justify-center gap-8 px-2 py-2 sm:gap-16">
           {TABS.map(({ href, label, icon: Icon }) => {
             const active = pathname === href;
             return (
