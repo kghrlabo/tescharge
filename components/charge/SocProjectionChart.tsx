@@ -93,18 +93,13 @@ export function SocProjectionChart({
             label={{ value: "90%", position: "right", fontSize: 11, fill: "var(--color-ink-faint)" }}
           />
           {live && latest && (
-            <ReferenceLine
-              x={latest.timestamp}
-              stroke="var(--color-accent-text)"
-              strokeDasharray="2 3"
-              label={{ value: "現在", position: "top", fontSize: 11, fill: "var(--color-accent-text)" }}
-            />
+            <ReferenceLine x={latest.timestamp} stroke="var(--color-accent-text)" strokeDasharray="2 3" />
           )}
           <Line
             type="monotone"
             dataKey="soc"
             name="soc"
-            stroke="var(--color-accent)"
+            stroke="var(--color-glow)"
             strokeWidth={5}
             strokeLinecap="round"
             dot={false}
@@ -115,7 +110,7 @@ export function SocProjectionChart({
               type="monotone"
               dataKey="projectedSoc"
               name="projectedSoc"
-              stroke="var(--color-accent-text)"
+              stroke="var(--color-glow-text)"
               strokeWidth={2.5}
               strokeLinecap="round"
               strokeDasharray="6 4"

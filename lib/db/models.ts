@@ -13,6 +13,9 @@ export interface ChargeSession {
   /** km */
   startOdometerKm: number | null;
   endOdometerKm: number | null;
+  /** km — rated range at the current battery level; null for sessions recorded before this field existed */
+  startRangeKm: number | null;
+  endRangeKm: number | null;
   startOutsideTempC: number | null;
   endOutsideTempC: number | null;
   startLat: number | null;

@@ -140,6 +140,10 @@ export async function fakeGetVehicleData(): Promise<TeslaVehicleData> {
 
   const remainingKwh = ((s.scenario.targetSoc - soc) / 100) * s.scenario.batteryCapacityKwh;
   const minutesToFull = kw > 0 ? Math.max(0, Math.round((remainingKwh / kw) * 60)) : 0;
+  // Rough EPA-rated efficiency for a Model 3/Y-class 75kWh pack — good enough for
+  // a fake-mode range figure, not meant to match any real trim precisely.
+  const MILES_PER_KWH = 4.3;
+  const batteryRangeMiles = (soc / 100) * s.scenario.batteryCapacityKwh * MILES_PER_KWH;
 
   return {
     id: FAKE_VEHICLE_ID,
@@ -154,6 +158,7 @@ export async function fakeGetVehicleData(): Promise<TeslaVehicleData> {
       charger_actual_current: Math.round(current),
       charge_energy_added: Math.round(energyAddedKwh * 10) / 10,
       minutes_to_full_charge: minutesToFull,
+      battery_range: Math.round(batteryRangeMiles * 10) / 10,
       fast_charger_present: s.scenario.acOrDc === "DC",
       fast_charger_type: s.scenario.fastChargerType,
       fast_charger_brand: s.scenario.fastChargerBrand,

@@ -4,6 +4,7 @@ export interface CreateSessionInput {
   startedAt: number;
   startSoc: number;
   startOdometerKm: number | null;
+  startRangeKm: number | null;
   startOutsideTempC: number | null;
   startLat: number | null;
   startLng: number | null;
@@ -14,6 +15,7 @@ export interface CompleteSessionInput {
   endedAt: number;
   endSoc: number;
   endOdometerKm: number | null;
+  endRangeKm: number | null;
   endOutsideTempC: number | null;
   locationType: LocationType;
   chargerId: string | null;

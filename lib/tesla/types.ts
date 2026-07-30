@@ -37,6 +37,8 @@ export interface TeslaChargeState {
   /** kWh added so far this plug-in */
   charge_energy_added: number;
   minutes_to_full_charge: number;
+  /** miles — rated range at the current battery level */
+  battery_range: number;
   fast_charger_present: boolean;
   fast_charger_type: string;
   fast_charger_brand: string;
@@ -79,6 +81,8 @@ export interface ChargeStatusPayload {
   chargerCurrentA: number;
   energyAddedKwh: number;
   minutesToFull: number;
+  /** miles — convert with lib/format.ts milesToKm() for display */
+  rangeMiles: number;
   fastChargerPresent: boolean;
   fastChargerType: string;
   fastChargerBrand: string;
@@ -99,6 +103,7 @@ export function toChargeStatusPayload(data: TeslaVehicleData): ChargeStatusPaylo
     chargerCurrentA: data.charge_state.charger_actual_current,
     energyAddedKwh: data.charge_state.charge_energy_added,
     minutesToFull: data.charge_state.minutes_to_full_charge,
+    rangeMiles: data.charge_state.battery_range,
     fastChargerPresent: data.charge_state.fast_charger_present,
     fastChargerType: data.charge_state.fast_charger_type,
     fastChargerBrand: data.charge_state.fast_charger_brand,

@@ -19,8 +19,8 @@
   --color-accent-strong: #2f57c4;
   --color-accent-text: #2f57c4;
 
-  --color-glow: #0f9d73;
-  --color-glow-text: #0c8a64;
+  --color-glow: #1a9e46;
+  --color-glow-text: #158a3c;
 
   --color-warn: #b06a00;
   --color-danger: #d92d2d;
@@ -48,8 +48,8 @@
     --color-accent-strong: #588cff;
     --color-accent-text: #7c9cff;
 
-    --color-glow: #22d3a5;
-    --color-glow-text: #4fe0bb;
+    --color-glow: #30d158;
+    --color-glow-text: #5fe88a;
 
     --color-warn: #f5a623;
     --color-danger: #ff4d4d;
@@ -85,27 +85,7 @@ body {
   color: var(--foreground);
 }
 
-@keyframes ring-pulse {
-  0%,
-  100% {
-    opacity: 0.55;
-    filter: blur(10px);
-  }
-  50% {
-    opacity: 1;
-    filter: blur(16px);
-  }
-}
-
-.charge-ring-glow {
-  animation: ring-pulse 2.4s ease-in-out infinite;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .charge-ring-glow {
-    animation: none;
-    opacity: 0.85;
-  }
   * {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;

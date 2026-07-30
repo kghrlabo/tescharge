@@ -36,42 +36,6 @@ export function SettingsIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
-export function BoltIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg {...base} {...props}>
-      <path d="M13 3 5 13h6l-1 8 8-10h-6l1-8Z" />
-    </svg>
-  );
-}
-
-export function PlugIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg {...base} {...props}>
-      <path d="M9 3v5M15 3v5" />
-      <path d="M7 8h10v3a5 5 0 0 1-5 5 5 5 0 0 1-5-5V8Z" />
-      <path d="M12 16v5" />
-    </svg>
-  );
-}
-
-export function LockIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg {...base} {...props}>
-      <rect x="5" y="11" width="14" height="9" rx="2" />
-      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-    </svg>
-  );
-}
-
-export function CheckCircleIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg {...base} {...props}>
-      <circle cx="12" cy="12" r="9" />
-      <path d="m8.5 12.5 2.5 2.5 5-5.5" />
-    </svg>
-  );
-}
-
 export function SnowflakeIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...base} {...props}>
@@ -85,17 +49,6 @@ export function ChevronRightIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...base} {...props}>
       <path d="m9 5 7 7-7 7" />
-    </svg>
-  );
-}
-
-export function CalendarClockIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg {...base} {...props}>
-      <rect x="3.5" y="5" width="17" height="15" rx="2" />
-      <path d="M3.5 9.5h17M8 3v3M16 3v3" />
-      <circle cx="14.5" cy="14.5" r="3.2" />
-      <path d="M14.5 13v1.6l1.1.9" />
     </svg>
   );
 }

@@ -13,12 +13,12 @@ export function SessionSocBar({
     <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-surface-raised">
       {/* 0% -> startSoc%: charge the battery already had before this session */}
       <div
-        className="absolute inset-y-0 left-0 rounded-l-full bg-accent/30"
+        className="absolute inset-y-0 left-0 rounded-l-full bg-glow/30"
         style={{ width: `${startPct}%` }}
       />
       {/* startSoc% -> endSoc%: charge added during this session */}
       <div
-        className="absolute inset-y-0 rounded-r-full bg-accent"
+        className="absolute inset-y-0 rounded-r-full bg-glow"
         style={{ left: `${startPct}%`, width: `${gainWidthPct}%` }}
       />
       <div

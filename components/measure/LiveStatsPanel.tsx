@@ -53,15 +53,10 @@ export function LiveStatsPanel({
     );
   }
 
-  const isComplete = latest.chargingState === "Complete";
-  const isCharging = latest.chargingState === "Charging";
-
   return (
     <StatsRingPanel
       soc={latest.soc}
       startSoc={startPayload.soc}
-      charging={isCharging}
-      complete={isComplete}
       ringSubLabel={RING_STATE_LABEL[latest.chargingState] ?? "充電中"}
     >
       {detail}
