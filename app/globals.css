@@ -1,35 +1,59 @@
 @import "tailwindcss";
 
-/* Force the Tesla-console dark theme regardless of OS preference: `dark:` utilities
-   activate only inside `.dark`, and layout.tsx always sets that class on <html>. */
-@custom-variant dark (&:where(.dark, .dark *));
-
 :root {
-  --background: #0a0a0a;
-  --foreground: #f5f5f7;
+  color-scheme: light dark;
 
-  --color-void: #0a0a0a;
-  --color-surface: #141414;
-  --color-surface-raised: #1c1c1e;
-  --color-hairline: #2a2a2c;
+  --background: #f7f7f8;
+  --foreground: #14141a;
 
-  --color-ink: #f5f5f7;
-  --color-ink-dim: #9a9aa0;
-  --color-ink-faint: #6b6b70;
+  --color-void: #f2f2f4;
+  --color-surface: #ffffff;
+  --color-surface-raised: #eeeef0;
+  --color-hairline: #e0e0e3;
+
+  --color-ink: #14141a;
+  --color-ink-dim: #55555f;
+  --color-ink-faint: #82828b;
 
   --color-accent: #3e6ae1;
-  --color-accent-strong: #588cff;
-  --color-accent-text: #7c9cff;
+  --color-accent-strong: #2f57c4;
+  --color-accent-text: #2f57c4;
 
-  --color-glow: #22d3a5;
-  --color-glow-text: #4fe0bb;
+  --color-glow: #0f9d73;
+  --color-glow-text: #0c8a64;
 
-  --color-warn: #f5a623;
-  --color-danger: #ff4d4d;
+  --color-warn: #b06a00;
+  --color-danger: #d92d2d;
 
   --radius-chip: 10px;
   --radius-card: 16px;
   --radius-hero: 24px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #f5f5f7;
+
+    --color-void: #0a0a0a;
+    --color-surface: #141414;
+    --color-surface-raised: #1c1c1e;
+    --color-hairline: #2a2a2c;
+
+    --color-ink: #f5f5f7;
+    --color-ink-dim: #9a9aa0;
+    --color-ink-faint: #6b6b70;
+
+    --color-accent: #3e6ae1;
+    --color-accent-strong: #588cff;
+    --color-accent-text: #7c9cff;
+
+    --color-glow: #22d3a5;
+    --color-glow-text: #4fe0bb;
+
+    --color-warn: #f5a623;
+    --color-danger: #ff4d4d;
+  }
 }
 
 @theme inline {

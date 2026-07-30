@@ -24,12 +24,12 @@ function getIsDesktopServerSnapshot() {
  * historical Session Detail screen (SessionStatsPanel), so both keep the
  * same visual language even though the numbers behind them differ.
  *
- * `children` (start time, odometer, location, precon, and — now that they're
- * off the always-visible face — the speed/energy/ETA figures too) lives
- * behind a collapse toggle so the panel doesn't push the charts below the
- * fold on a narrow screen — collapsed by default on mobile, expanded by
- * default once there's a dedicated `lg+` column for it. A manual toggle
- * always wins over that default, even if the viewport is later resized.
+ * Collapsed by default on mobile — bare SOC% plus an icon-only toggle, no
+ * ring, so the panel barely takes any vertical space. Expanded by default
+ * once there's a dedicated `lg+` column for it, where the ring and
+ * `children` (start time, odometer, location, precon, speed/energy/ETA
+ * figures) show together. A manual toggle always wins over that viewport
+ * default, even if the window is later resized.
  */
 export function StatsRingPanel({
   soc,
@@ -53,33 +53,45 @@ export function StatsRingPanel({
   );
   const [manuallyExpanded, setManuallyExpanded] = useState<boolean | null>(null);
   const expanded = manuallyExpanded ?? isDesktop;
+  const clampedSoc = Math.max(0, Math.min(100, soc));
+
+  const toggle = (
+    <button
+      type="button"
+      onClick={() => setManuallyExpanded(!expanded)}
+      aria-expanded={expanded}
+      aria-label={expanded ? "詳細を閉じる" : "詳細を見る"}
+      className="flex min-h-11 min-w-11 shrink-0 items-center justify-center text-ink-dim"
+    >
+      <ChevronRightIcon
+        className={`h-4 w-4 transition-transform ${expanded ? "-rotate-90" : "rotate-90"}`}
+      />
+    </button>
+  );
 
   return (
     <Card radius="rounded-hero">
-      <div className="flex flex-col items-center gap-3">
-        <ChargeRing
-          soc={soc}
-          startSoc={startSoc}
-          charging={charging}
-          complete={complete}
-          subLabel={ringSubLabel}
-          size={140}
-        />
-
-        {children && (
-          <button
-            type="button"
-            onClick={() => setManuallyExpanded(!expanded)}
-            aria-expanded={expanded}
-            className="flex min-h-11 w-full items-center justify-center gap-1 text-xs font-medium text-ink-dim"
-          >
-            {expanded ? "詳細を閉じる" : "詳細を見る"}
-            <ChevronRightIcon
-              className={`h-3.5 w-3.5 transition-transform ${expanded ? "rotate-90" : ""}`}
-            />
-          </button>
-        )}
-      </div>
+      {expanded ? (
+        <div className="flex flex-col items-center gap-3">
+          <ChargeRing
+            soc={soc}
+            startSoc={startSoc}
+            charging={charging}
+            complete={complete}
+            subLabel={ringSubLabel}
+            size={140}
+          />
+          {toggle}
+        </div>
+      ) : (
+        <div className="flex w-full items-center justify-between">
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-bold tabular-nums text-ink">{clampedSoc}%</span>
+            {ringSubLabel && <span className="text-xs text-ink-dim">{ringSubLabel}</span>}
+          </div>
+          {toggle}
+        </div>
+      )}
       {expanded && children}
     </Card>
   );

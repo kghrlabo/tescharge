@@ -52,7 +52,7 @@ export function ChargeChartsGrid({
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
       <Card padding="p-3" className="sm:col-span-2 xl:col-span-3">
-        <TileTitle title="SOC推移" />
+        <TileTitle title="SOC推移" value={latest ? `${latest.soc}%` : undefined} />
         <SocProjectionChart
           logPoints={logPoints}
           minutesToFull={minutesToFull}
