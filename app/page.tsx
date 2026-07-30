@@ -1,65 +1,152 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { SessionSummaryCard } from "@/components/session/SessionSummaryCard";
+import { useChargeSession } from "@/lib/polling/ChargeSessionContext";
+import { chargeSessionRepository } from "@/lib/db/repositories";
+import type { ChargeSession } from "@/lib/db/models";
+
+interface AuthStatus {
+  connected: boolean;
+  vehicleName: string | null;
+}
+
+export default function HomePage() {
+  const router = useRouter();
+  const { state, startMeasurement } = useChargeSession();
+  const [authStatus, setAuthStatus] = useState<AuthStatus | null>(null);
+  const [liveSoc, setLiveSoc] = useState<number | null>(null);
+  const [socError, setSocError] = useState<string | null>(null);
+  const [latestSession, setLatestSession] = useState<ChargeSession | null>(null);
+  const [starting, setStarting] = useState(false);
+  const [startError, setStartError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/status")
+      .then((res) => res.json())
+      .then(setAuthStatus)
+      .catch(() => setAuthStatus({ connected: false, vehicleName: null }));
+  }, []);
+
+  useEffect(() => {
+    chargeSessionRepository
+      .getLatestCompleteSession()
+      .then(setLatestSession)
+      .catch(() => {});
+  }, []);
+
+  const fetchLiveSoc = useCallback(() => {
+    // No synchronous setState here — everything happens inside the promise
+    // callbacks so this is safe to call from an effect body.
+    fetch("/api/vehicle/charge-status", { cache: "no-store" })
+      .then(async (res) => {
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body.error ?? "unknown_error");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setLiveSoc(data.soc);
+        setSocError(null);
+      })
+      .catch((err) => setSocError(err instanceof Error ? err.message : "unknown_error"));
+  }, []);
+
+  useEffect(() => {
+    if (authStatus?.connected && state.status === "idle") {
+      fetchLiveSoc();
+    }
+    // only re-fetch when connection state changes, not on every render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authStatus?.connected, state.status]);
+
+  const handleStart = async () => {
+    setStarting(true);
+    setStartError(null);
+    try {
+      const result = await startMeasurement();
+      if (result.ok) {
+        router.push("/measure");
+      } else {
+        setStartError(result.error);
+      }
+    } finally {
+      setStarting(false);
+    }
+  };
+
+  if (authStatus === null) {
+    return <p className="text-zinc-500">読み込み中...</p>;
+  }
+
+  if (!authStatus.connected) {
+    return (
+      <Card className="text-center">
+        <h1 className="text-xl font-bold">Charge Monitor</h1>
+        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+          充電セッションを記録・分析するには、まずTeslaアカウントと連携してください。
+        </p>
+        <a href="/api/auth/login">
+          <Button className="mt-4">Teslaアカウントと連携</Button>
+        </a>
+      </Card>
+    );
+  }
+
+  const isMeasuring = state.status === "waitingForCable" || state.status === "charging";
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="flex flex-col gap-6">
+      <h1 className="text-xl font-bold">Charge Monitor</h1>
+
+      <Card>
+        <p className="text-xs text-zinc-500">
+          車両SOC {authStatus.vehicleName ? `(${authStatus.vehicleName})` : ""}
+        </p>
+        {socError ? (
+          <p className="mt-2 text-sm text-red-600">取得に失敗しました（{socError}）</p>
+        ) : (
+          <p className="mt-2 text-4xl font-bold">{liveSoc !== null ? `${liveSoc}%` : "..."}</p>
+        )}
+        <button onClick={fetchLiveSoc} className="mt-1 text-xs text-accent-text hover:underline">
+          更新
+        </button>
+      </Card>
+
+      <div>
+        <Button
+          onClick={handleStart}
+          disabled={starting || isMeasuring}
+          className="w-full py-4 text-base"
+        >
+          {isMeasuring ? "計測中..." : starting ? "開始中..." : "計測開始"}
+        </Button>
+        {startError && (
+          <p className="mt-2 text-center text-sm text-red-600">開始に失敗しました（{startError}）</p>
+        )}
+        {isMeasuring && (
+          <Link
+            href="/measure"
+            className="mt-2 block text-center text-sm text-accent-text hover:underline"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+            計測画面に戻る
+          </Link>
+        )}
+      </div>
+
+      <div>
+        <p className="mb-2 text-sm font-semibold text-zinc-600 dark:text-zinc-400">最新セッション</p>
+        {latestSession ? (
+          <SessionSummaryCard session={latestSession} />
+        ) : (
+          <p className="text-sm text-zinc-400">まだ記録がありません</p>
+        )}
+      </div>
     </div>
   );
 }
