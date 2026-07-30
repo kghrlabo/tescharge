@@ -63,7 +63,7 @@ export function PowerVsSocChart({
           name="充電速度"
           stroke={METRIC_COLORS.kw}
           dot={false}
-          strokeWidth={4}
+          strokeWidth={5}
           strokeLinecap="round"
           isAnimationActive={false}
         />

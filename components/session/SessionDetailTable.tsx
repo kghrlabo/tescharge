@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { formatDateTime, formatKw } from "@/lib/format";
+import { formatDateTime, formatDurationMinutes, formatKw, formatKwh } from "@/lib/format";
 import type { ChargeSession, Charger } from "@/lib/db/models";
 
 const LOCATION_LABEL: Record<string, string> = {
@@ -37,9 +37,18 @@ export function SessionDetailTable({
   return (
     <div className="mt-4 flex flex-col gap-4 border-t border-hairline pt-4">
       <p className="text-[11px] font-semibold tracking-wide text-ink-faint uppercase">詳細情報</p>
-      <div className="grid grid-cols-1 gap-x-4 gap-y-3 lg:grid-cols-2">
-        <Row label="開始時刻" value={formatDateTime(session.startedAt)} />
+      <div className="flex flex-col gap-3">
         <Row label="終了時刻" value={session.endedAt ? formatDateTime(session.endedAt) : "-"} />
+        <Row
+          label="充電時間"
+          value={session.durationMinutes != null ? formatDurationMinutes(session.durationMinutes) : "-"}
+        />
+        <Row label="平均充電速度" value={session.avgKw != null ? formatKw(session.avgKw) : "-"} />
+        <Row
+          label="総充電量"
+          value={session.totalKwhAdded != null ? formatKwh(session.totalKwhAdded) : "-"}
+        />
+        <Row label="開始時刻" value={formatDateTime(session.startedAt)} />
         <Row label="場所 / 充電器" value={locationLabel} />
         <Row label="AC/DC" value={session.acOrDc ?? "-"} />
         <Row

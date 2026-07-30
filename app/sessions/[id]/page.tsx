@@ -1,12 +1,32 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useState, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { chargeSessionRepository, chargerRepository } from "@/lib/db/repositories";
 import type { ChargeSession, Charger, LogPoint } from "@/lib/db/models";
 import { SessionStatsPanel } from "@/components/session/SessionStatsPanel";
 import { ChargeChartsGrid } from "@/components/charts/ChargeChartsGrid";
 import { Button } from "@/components/ui/Button";
+import { useChargeSession } from "@/lib/polling/ChargeSessionContext";
+
+function CompletedBanner() {
+  const searchParams = useSearchParams();
+  const { reset } = useChargeSession();
+  const completed = searchParams.get("completed") === "1";
+
+  useEffect(() => {
+    // Clears the in-progress "finished" state now that its one job (getting
+    // the user here) is done, instead of on a button the intermediate
+    // screen used to have.
+    if (completed) reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [completed]);
+
+  if (!completed) return null;
+
+  return <p className="rounded-card bg-glow/15 p-3 text-sm text-glow-text">計測が完了しました</p>;
+}
 
 export default function SessionDetailPage({
   params,
@@ -59,6 +79,10 @@ export default function SessionDetailPage({
           削除
         </Button>
       </div>
+
+      <Suspense fallback={null}>
+        <CompletedBanner />
+      </Suspense>
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-[260px_1fr] lg:items-start">
         <SessionStatsPanel session={session} charger={charger} />

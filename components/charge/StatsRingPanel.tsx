@@ -1,24 +1,35 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, useSyncExternalStore, type ReactNode } from "react";
 import { Card } from "@/components/ui/Card";
 import { ChargeRing } from "@/components/charge/ChargeRing";
 import { ChevronRightIcon } from "@/components/ui/icons";
 
-export interface StatTile {
-  value: string;
-  label: string;
+const DESKTOP_QUERY = "(min-width: 1024px)";
+
+function subscribeToDesktopQuery(callback: () => void) {
+  const mql = window.matchMedia(DESKTOP_QUERY);
+  mql.addEventListener("change", callback);
+  return () => mql.removeEventListener("change", callback);
+}
+function getIsDesktop() {
+  return window.matchMedia(DESKTOP_QUERY).matches;
+}
+function getIsDesktopServerSnapshot() {
+  return false;
 }
 
 /**
- * Ring + key-stat tiles shared by the live measuring screen (LiveStatsPanel)
- * and the historical Session Detail screen (SessionStatsPanel), so both keep
- * the same visual language even though the numbers behind them differ.
+ * Ring shared by the live measuring screen (LiveStatsPanel) and the
+ * historical Session Detail screen (SessionStatsPanel), so both keep the
+ * same visual language even though the numbers behind them differ.
  *
- * `children` (start time, odometer, location, precon, ...) lives behind a
- * collapse toggle so the panel doesn't push the charts below the fold on a
- * narrow screen — collapsed by default on mobile, expanded by default once
- * there's a dedicated `lg+` column for it.
+ * `children` (start time, odometer, location, precon, and — now that they're
+ * off the always-visible face — the speed/energy/ETA figures too) lives
+ * behind a collapse toggle so the panel doesn't push the charts below the
+ * fold on a narrow screen — collapsed by default on mobile, expanded by
+ * default once there's a dedicated `lg+` column for it. A manual toggle
+ * always wins over that default, even if the viewport is later resized.
  */
 export function StatsRingPanel({
   soc,
@@ -26,9 +37,6 @@ export function StatsRingPanel({
   charging = false,
   complete = false,
   ringSubLabel,
-  badge,
-  tiles,
-  footer,
   children,
 }: {
   soc: number;
@@ -36,16 +44,15 @@ export function StatsRingPanel({
   charging?: boolean;
   complete?: boolean;
   ringSubLabel?: ReactNode;
-  badge?: ReactNode;
-  tiles: StatTile[];
-  footer?: ReactNode;
   children?: ReactNode;
 }) {
-  const [expanded, setExpanded] = useState(false);
-
-  useEffect(() => {
-    setExpanded(window.matchMedia("(min-width: 1024px)").matches);
-  }, []);
+  const isDesktop = useSyncExternalStore(
+    subscribeToDesktopQuery,
+    getIsDesktop,
+    getIsDesktopServerSnapshot
+  );
+  const [manuallyExpanded, setManuallyExpanded] = useState<boolean | null>(null);
+  const expanded = manuallyExpanded ?? isDesktop;
 
   return (
     <Card radius="rounded-hero">
@@ -58,23 +65,11 @@ export function StatsRingPanel({
           subLabel={ringSubLabel}
           size={140}
         />
-        {badge}
-
-        <div className="grid w-full grid-cols-3 gap-2 text-center">
-          {tiles.map((tile) => (
-            <div key={tile.label}>
-              <p className="text-lg font-semibold tabular-nums text-ink">{tile.value}</p>
-              <p className="text-[11px] tracking-wide text-ink-faint uppercase">{tile.label}</p>
-            </div>
-          ))}
-        </div>
-
-        {footer}
 
         {children && (
           <button
             type="button"
-            onClick={() => setExpanded((v) => !v)}
+            onClick={() => setManuallyExpanded(!expanded)}
             aria-expanded={expanded}
             className="flex min-h-11 w-full items-center justify-center gap-1 text-xs font-medium text-ink-dim"
           >

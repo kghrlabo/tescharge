@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import { chargerRepository, settingsRepository } from "@/lib/db/repositories";
 import { classifyLocation } from "@/lib/location/classify";
-import { milesToKm, formatDateTime } from "@/lib/format";
+import { milesToKm, formatDateTime, formatTime } from "@/lib/format";
 import { SnowflakeIcon } from "@/components/ui/icons";
 import type { Charger } from "@/lib/db/models";
 import type { ChargeStatusPayload } from "@/lib/tesla/types";
-import type { LocationOverride } from "@/lib/polling/chargeStateMachine";
+import type { LocationOverride, LogPointDraft } from "@/lib/polling/chargeStateMachine";
 
 const LOCATION_LABEL: Record<string, string> = { home: "自宅", other: "その他" };
 
@@ -25,12 +25,15 @@ export function SessionMetaPanel({
   onLocationChange,
   precon,
   onPreconChange,
+  latest,
 }: {
   startPayload: ChargeStatusPayload;
   locationOverride: LocationOverride | null;
   onLocationChange: (value: LocationOverride | null) => void;
   precon: boolean;
   onPreconChange: (value: boolean) => void;
+  /** null while still waiting for the cable — the speed/energy/ETA rows show "-". */
+  latest: LogPointDraft | null;
 }) {
   const [chargers, setChargers] = useState<Charger[]>([]);
   const [autoLocationLabel, setAutoLocationLabel] = useState("判定中...");
@@ -68,11 +71,30 @@ export function SessionMetaPanel({
   const inputClass =
     "min-h-11 rounded-chip border border-hairline bg-surface-raised px-3 py-1.5 text-sm text-ink";
 
+  const etaMs =
+    latest && latest.minutesToFull > 0 ? latest.timestamp + latest.minutesToFull * 60_000 : null;
+
   return (
     <div className="mt-4 flex flex-col gap-4 border-t border-hairline pt-4 text-sm">
       <p className="text-[11px] font-semibold tracking-wide text-ink-faint uppercase">詳細情報</p>
 
-      <div className="grid grid-cols-1 gap-x-4 gap-y-3 lg:grid-cols-2">
+      <div className="flex flex-col gap-3">
+        <div className="flex justify-between border-b border-hairline pb-2">
+          <span className="text-ink-dim">推定終了</span>
+          <span className="font-medium text-ink">{etaMs ? formatTime(etaMs) : "-"}</span>
+        </div>
+        <div className="flex justify-between border-b border-hairline pb-2">
+          <span className="text-ink-dim">充電速度</span>
+          <span className="font-medium text-ink">
+            {latest ? `${latest.chargerPowerKw.toFixed(1)} kW` : "-"}
+          </span>
+        </div>
+        <div className="flex justify-between border-b border-hairline pb-2">
+          <span className="text-ink-dim">追加電力量</span>
+          <span className="font-medium text-ink">
+            {latest ? `${latest.energyAddedKwh.toFixed(1)} kWh` : "-"}
+          </span>
+        </div>
         <div className="flex justify-between border-b border-hairline pb-2">
           <span className="text-ink-dim">開始時刻</span>
           <span className="font-medium text-ink">{formatDateTime(startPayload.timestamp)}</span>

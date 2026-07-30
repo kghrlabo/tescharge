@@ -11,14 +11,8 @@ import { Card } from "@/components/ui/Card";
 
 export default function MeasurePage() {
   const router = useRouter();
-  const {
-    state,
-    togglePrecon,
-    changeLocationOverride,
-    cancelMeasurement,
-    reset,
-    pollNow,
-  } = useChargeSession();
+  const { state, togglePrecon, changeLocationOverride, cancelMeasurement, pollNow } =
+    useChargeSession();
   const [useFakeTeslaApi, setUseFakeTeslaApi] = useState(false);
   const [vehicleName, setVehicleName] = useState<string | null>(null);
 
@@ -27,6 +21,14 @@ export default function MeasurePage() {
       router.replace("/");
     }
   }, [state.status, router]);
+
+  useEffect(() => {
+    if (state.status === "finished") {
+      router.replace(`/sessions/${state.sessionId}?completed=1`);
+    }
+    // `state` (not just state.status) so the redirect fires with the right
+    // sessionId the moment the machine transitions to "finished".
+  }, [state, router]);
 
   useEffect(() => {
     fetch("/api/auth/status")
@@ -43,31 +45,8 @@ export default function MeasurePage() {
     pollNow();
   };
 
-  if (state.status === "idle") {
+  if (state.status === "idle" || state.status === "finished") {
     return null;
-  }
-
-  if (state.status === "finished") {
-    return (
-      <Card className="mx-auto w-full max-w-lg text-center">
-        <p className="text-lg font-semibold text-ink">計測が完了しました</p>
-        <p className="mt-2 text-sm text-ink-dim">
-          {state.summary.endSoc}% まで充電（{state.summary.totalKwhAdded.toFixed(1)} kWh）
-        </p>
-        <div className="mt-4 flex justify-center gap-3">
-          <Button onClick={() => router.push(`/sessions/${state.sessionId}`)}>詳細を見る</Button>
-          <Button
-            variant="secondary"
-            onClick={() => {
-              reset();
-              router.push("/");
-            }}
-          >
-            ホームへ
-          </Button>
-        </div>
-      </Card>
-    );
   }
 
   const handleCancel = async () => {
