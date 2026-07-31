@@ -22,18 +22,17 @@ export function toLogPointDraft(
   };
 }
 
-/** Same window as derive.ts's DC_NO_PRECON_WARMUP_SEC — how long a cold pack's
- * heater is expected to run after charging starts. */
-const PRECON_DETECTION_WINDOW_SEC = 8 * 60;
+/** How long to watch battery_heater_on before concluding it's never coming on. */
+const PRECON_DETECTION_WINDOW_SEC = 5 * 60;
 
 /**
  * Auto-detects whether the battery was already warm when charging began, from
  * the vehicle's own battery_heater_on telemetry — replaces what used to be a
  * manual per-session toggle.
  *
- * - Heater seen on at any point in the first 8 minutes → not preconditioned (false),
+ * - Heater seen on at any point in the first 5 minutes → not preconditioned (false),
  *   decided as soon as it's observed.
- * - 8 minutes pass with the heater never on → preconditioned (true).
+ * - 5 minutes pass with the heater never on → preconditioned (true).
  * - Otherwise (still early, heater not yet seen on) → undetermined (null).
  */
 export function detectPreconditioned(logPoints: LogPointDraft[]): boolean | null {
