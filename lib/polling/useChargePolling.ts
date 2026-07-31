@@ -213,30 +213,6 @@ export function useChargePolling() {
     dispatch({ type: "LOCATION_OVERRIDE_CHANGED", value });
   }, []);
 
-  // Optimistic: applies locally right away so the buttons feel immediate, then sends
-  // the command. The next poll's payload.chargeLimitSoc (the vehicle's real value) is
-  // the actual source of truth and will overwrite this if the command didn't take.
-  const setChargeLimit = useCallback(
-    async (percent: number): Promise<{ ok: true } | { ok: false; error: string }> => {
-      dispatch({ type: "CHARGE_LIMIT_CHANGED", value: percent });
-      try {
-        const res = await fetch("/api/vehicle/set-charge-limit", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ percent }),
-        });
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
-          return { ok: false, error: body.error ?? "unknown_error" };
-        }
-        return { ok: true };
-      } catch {
-        return { ok: false, error: "network_error" };
-      }
-    },
-    []
-  );
-
   const cancelMeasurement = useCallback(async () => {
     const current = stateRef.current;
     if (current.status === "waitingForCable" || current.status === "charging") {
@@ -262,7 +238,6 @@ export function useChargePolling() {
     startMeasurement,
     togglePrecon,
     changeLocationOverride,
-    setChargeLimit,
     cancelMeasurement,
     reset,
     pollNow,

@@ -70,7 +70,6 @@ export type ChargeMachineEvent =
   | { type: "POLL_ERROR"; message: string }
   | { type: "PRECON_TOGGLED"; value: boolean }
   | { type: "LOCATION_OVERRIDE_CHANGED"; value: LocationOverride | null }
-  | { type: "CHARGE_LIMIT_CHANGED"; value: number }
   | { type: "SESSION_FINISHED"; sessionId: string; summary: CompleteSessionInput }
   | { type: "RESET" };
 
@@ -115,11 +114,6 @@ export function chargeMachineReducer(
     case "LOCATION_OVERRIDE_CHANGED": {
       if (state.status !== "waitingForCable" && state.status !== "charging") return state;
       return { ...state, locationOverride: event.value };
-    }
-
-    case "CHARGE_LIMIT_CHANGED": {
-      if (state.status !== "waitingForCable" && state.status !== "charging") return state;
-      return { ...state, chargeLimitSoc: event.value };
     }
 
     case "POLL_SUCCESS": {

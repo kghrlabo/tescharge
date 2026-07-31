@@ -1,6 +1,5 @@
 import { StatsRingPanel } from "@/components/charge/StatsRingPanel";
 import { SessionMetaPanel } from "./SessionMetaPanel";
-import { ChargeLimitPresetButtons } from "./ChargeLimitPresetButtons";
 import type { LogPointDraft, LocationOverride } from "@/lib/polling/chargeStateMachine";
 import type { ChargeStatusPayload } from "@/lib/tesla/types";
 
@@ -15,10 +14,10 @@ const RING_STATE_LABEL: Record<string, string> = {
 
 /**
  * Owns the ring + the collapsible detail zone (SessionMetaPanel — start time,
- * location, precon, and the live speed/energy/ETA figures) for both the
- * "waiting for cable" and "charging" states of the live measuring screen —
- * pass `latest: null` while there's no telemetry yet so the two states
- * render inside the same shell instead of two screens.
+ * location, precon, charge limit, and the live speed/energy/ETA figures) for
+ * both the "waiting for cable" and "charging" states of the live measuring
+ * screen — pass `latest: null` while there's no telemetry yet so the two
+ * states render inside the same shell instead of two screens.
  */
 export function LiveStatsPanel({
   latest,
@@ -28,7 +27,6 @@ export function LiveStatsPanel({
   locationOverride,
   onLocationChange,
   chargeLimitSoc,
-  onChargeLimitChange,
 }: {
   latest: LogPointDraft | null;
   startPayload: ChargeStatusPayload;
@@ -37,9 +35,6 @@ export function LiveStatsPanel({
   locationOverride: LocationOverride | null;
   onLocationChange: (value: LocationOverride | null) => void;
   chargeLimitSoc: number;
-  onChargeLimitChange: (
-    percent: number
-  ) => Promise<{ ok: true } | { ok: false; error: string }>;
 }) {
   const detail = (
     <SessionMetaPanel
@@ -49,21 +44,13 @@ export function LiveStatsPanel({
       precon={precon}
       onPreconChange={onPreconChange}
       latest={latest}
+      chargeLimitSoc={chargeLimitSoc}
     />
-  );
-
-  const chargeLimitButtons = (
-    <ChargeLimitPresetButtons value={chargeLimitSoc} onChange={onChargeLimitChange} />
   );
 
   if (!latest) {
     return (
-      <StatsRingPanel
-        soc={startPayload.soc}
-        startSoc={startPayload.soc}
-        ringSubLabel="ケーブル接続待ち"
-        belowBar={chargeLimitButtons}
-      >
+      <StatsRingPanel soc={startPayload.soc} startSoc={startPayload.soc} ringSubLabel="ケーブル接続待ち">
         {detail}
       </StatsRingPanel>
     );
@@ -74,7 +61,6 @@ export function LiveStatsPanel({
       soc={latest.soc}
       startSoc={startPayload.soc}
       ringSubLabel={RING_STATE_LABEL[latest.chargingState] ?? "充電中"}
-      belowBar={chargeLimitButtons}
     >
       {detail}
     </StatsRingPanel>

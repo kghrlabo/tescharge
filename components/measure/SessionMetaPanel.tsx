@@ -26,6 +26,7 @@ export function SessionMetaPanel({
   precon,
   onPreconChange,
   latest,
+  chargeLimitSoc,
 }: {
   startPayload: ChargeStatusPayload;
   locationOverride: LocationOverride | null;
@@ -34,6 +35,8 @@ export function SessionMetaPanel({
   onPreconChange: (value: boolean) => void;
   /** null while still waiting for the cable — the speed/energy/ETA rows show "-". */
   latest: LogPointDraft | null;
+  /** percent — the vehicle's own charge-limit setting, read-only (may change on the car itself mid-charge; kept in sync via polling). */
+  chargeLimitSoc: number;
 }) {
   const [chargers, setChargers] = useState<Charger[]>([]);
   const [autoLocationLabel, setAutoLocationLabel] = useState("判定中...");
@@ -136,6 +139,10 @@ export function SessionMetaPanel({
               />
             </span>
           </button>
+        </div>
+        <div className="flex justify-between border-b border-hairline pb-2">
+          <span className="text-ink-dim">充電上限</span>
+          <span className="font-medium text-ink">{chargeLimitSoc}%</span>
         </div>
       </div>
 
