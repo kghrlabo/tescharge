@@ -41,6 +41,9 @@ export interface TeslaChargeState {
   battery_range: number;
   /** percent — the vehicle's actual charge-limit setting, not an app preference */
   charge_limit_soc: number;
+  /** true while the pack heater is actively running to bring a cold battery up to
+   * temperature for charging — the basis for auto-detecting preconditioning. */
+  battery_heater_on: boolean;
   fast_charger_present: boolean;
   fast_charger_type: string;
   fast_charger_brand: string;
@@ -86,6 +89,7 @@ export interface ChargeStatusPayload {
   /** miles — convert with lib/format.ts milesToKm() for display */
   rangeMiles: number;
   chargeLimitSoc: number;
+  batteryHeaterOn: boolean;
   fastChargerPresent: boolean;
   fastChargerType: string;
   fastChargerBrand: string;
@@ -108,6 +112,7 @@ export function toChargeStatusPayload(data: TeslaVehicleData): ChargeStatusPaylo
     minutesToFull: data.charge_state.minutes_to_full_charge,
     rangeMiles: data.charge_state.battery_range,
     chargeLimitSoc: data.charge_state.charge_limit_soc,
+    batteryHeaterOn: data.charge_state.battery_heater_on,
     fastChargerPresent: data.charge_state.fast_charger_present,
     fastChargerType: data.charge_state.fast_charger_type,
     fastChargerBrand: data.charge_state.fast_charger_brand,

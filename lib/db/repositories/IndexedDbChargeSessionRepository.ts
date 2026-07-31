@@ -52,10 +52,9 @@ export class IndexedDbChargeSessionRepository implements ChargeSessionRepository
     await getDb().logPoints.add({ ...point, sessionId });
   }
 
-  async markActive(sessionId: string, preconditioned: boolean | null): Promise<void> {
+  async markActive(sessionId: string): Promise<void> {
     await getDb().sessions.update(sessionId, {
       status: "active",
-      preconditioned,
       updatedAt: Date.now(),
     });
   }

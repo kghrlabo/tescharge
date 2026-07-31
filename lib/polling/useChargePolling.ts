@@ -15,6 +15,7 @@ import {
   createIdleState,
   toLogPointDraft,
   isSessionEndedChargingState,
+  detectPreconditioned,
   type ChargeMachineState,
   type LocationOverride,
 } from "./chargeStateMachine";
@@ -77,7 +78,7 @@ async function buildCompleteInput(
     acOrDc: current.startPayload.fastChargerPresent ? "DC" : "AC",
     fastChargerType: current.startPayload.fastChargerType || null,
     fastChargerBrand: current.startPayload.fastChargerBrand || null,
-    preconditioned: current.precon,
+    preconditioned: detectPreconditioned(current.logPoints),
     chargeLimitSoc: current.chargeLimitSoc,
     avgKw: Math.round(avgKw * 10) / 10,
     maxKw: Math.round(maxKw * 10) / 10,
@@ -134,7 +135,7 @@ export function useChargePolling() {
       }
 
       if (current.status === "waitingForCable" && cs === "Charging") {
-        await chargeSessionRepository.markActive(current.sessionId, current.precon);
+        await chargeSessionRepository.markActive(current.sessionId);
         await chargeSessionRepository.appendLogPoint(current.sessionId, toLogPointDraft(payload, 0));
       } else if (current.status === "charging") {
         const elapsedSeconds = Math.max(
@@ -200,13 +201,8 @@ export function useChargePolling() {
       type: "START_PRESSED",
       sessionId: session.id,
       payload,
-      preconDefault: settings.preconDefault,
     });
     return { ok: true };
-  }, []);
-
-  const togglePrecon = useCallback((value: boolean) => {
-    dispatch({ type: "PRECON_TOGGLED", value });
   }, []);
 
   const changeLocationOverride = useCallback((value: LocationOverride | null) => {
@@ -236,7 +232,6 @@ export function useChargePolling() {
   return {
     state,
     startMeasurement,
-    togglePrecon,
     changeLocationOverride,
     cancelMeasurement,
     reset,

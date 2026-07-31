@@ -178,24 +178,6 @@ export default function SettingsPage() {
           />
         </div>
       </Card>
-
-      <Card>
-        <h2 className="text-sm font-semibold text-ink">プレコンディショニング</h2>
-        <div className="mt-2 flex items-center justify-between text-sm">
-          <span className="text-ink-dim">計測開始時のデフォルト値</span>
-          <button
-            type="button"
-            onClick={() => updateSettings({ preconDefault: !settings.preconDefault })}
-            className={`rounded-full px-3 py-1 text-xs font-medium ${
-              settings.preconDefault
-                ? "bg-accent text-white"
-                : "bg-surface-raised text-ink-dim border border-hairline"
-            }`}
-          >
-            {settings.preconDefault ? "あり" : "なし"}
-          </button>
-        </div>
-      </Card>
     </div>
   );
 }

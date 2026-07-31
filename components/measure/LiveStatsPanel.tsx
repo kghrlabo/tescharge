@@ -14,24 +14,22 @@ const RING_STATE_LABEL: Record<string, string> = {
 
 /**
  * Owns the ring + the collapsible detail zone (SessionMetaPanel — start time,
- * location, precon, charge limit, and the live speed/energy/ETA figures) for
- * both the "waiting for cable" and "charging" states of the live measuring
- * screen — pass `latest: null` while there's no telemetry yet so the two
- * states render inside the same shell instead of two screens.
+ * location, auto-detected precon, charge limit, and the live speed/energy/ETA
+ * figures) for both the "waiting for cable" and "charging" states of the live
+ * measuring screen — pass `latest: null` while there's no telemetry yet so
+ * the two states render inside the same shell instead of two screens.
  */
 export function LiveStatsPanel({
   latest,
   startPayload,
-  precon,
-  onPreconChange,
+  preconditioned,
   locationOverride,
   onLocationChange,
   chargeLimitSoc,
 }: {
   latest: LogPointDraft | null;
   startPayload: ChargeStatusPayload;
-  precon: boolean;
-  onPreconChange: (value: boolean) => void;
+  preconditioned: boolean | null;
   locationOverride: LocationOverride | null;
   onLocationChange: (value: LocationOverride | null) => void;
   chargeLimitSoc: number;
@@ -41,8 +39,7 @@ export function LiveStatsPanel({
       startPayload={startPayload}
       locationOverride={locationOverride}
       onLocationChange={onLocationChange}
-      precon={precon}
-      onPreconChange={onPreconChange}
+      preconditioned={preconditioned}
       latest={latest}
       chargeLimitSoc={chargeLimitSoc}
     />

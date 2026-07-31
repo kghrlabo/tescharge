@@ -112,6 +112,7 @@ export async function fakeGetVehicleData(): Promise<TeslaVehicleData> {
   let kw = 0;
   let current = 0;
   let energyAddedKwh = 0;
+  let batteryHeaterOn = false;
 
   if (s.cableConnectedAtMs === null) {
     chargingState = "Disconnected";
@@ -123,6 +124,9 @@ export async function fakeGetVehicleData(): Promise<TeslaVehicleData> {
     kw = result.kw;
     energyAddedKwh = result.energyAddedKwh;
     current = kw > 0 ? (kw * 1000) / s.scenario.voltage : 0;
+    // Mirrors the precon-detection window in chargeStateMachine.ts: a cold pack
+    // (per the scenario) keeps the heater on for the first 8 simulated minutes.
+    batteryHeaterOn = s.scenario.batteryHeaterOnAtStart && chargingElapsedSimSec < 8 * 60;
 
     if (s.scenario.interruptAfterSoc && soc >= s.scenario.interruptAfterSoc) {
       chargingState = "Disconnected";
@@ -160,6 +164,7 @@ export async function fakeGetVehicleData(): Promise<TeslaVehicleData> {
       minutes_to_full_charge: minutesToFull,
       battery_range: Math.round(batteryRangeMiles * 10) / 10,
       charge_limit_soc: s.scenario.targetSoc,
+      battery_heater_on: batteryHeaterOn,
       fast_charger_present: s.scenario.acOrDc === "DC",
       fast_charger_type: s.scenario.fastChargerType,
       fast_charger_brand: s.scenario.fastChargerBrand,

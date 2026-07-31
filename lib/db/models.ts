@@ -51,9 +51,9 @@ export interface LogPoint {
   energyAddedKwh: number;
   minutesToFull: number;
   chargingState: string;
+  /** whether the pack heater was running at this poll — used to auto-detect preconditioning. */
+  batteryHeaterOn: boolean;
 }
-
-export type PreconInputMethod = "toggle-per-session" | "always-yes" | "always-no";
 
 export interface AppSettings {
   id: "app-settings";
@@ -63,8 +63,6 @@ export interface AppSettings {
   homeLat: number | null;
   homeLng: number | null;
   homeRadiusM: number;
-  preconDefault: boolean;
-  preconInputMethod: PreconInputMethod;
 }
 
 export interface Charger {
@@ -88,6 +86,4 @@ export const DEFAULT_SETTINGS: AppSettings = {
   homeLat: null,
   homeLng: null,
   homeRadiusM: 150,
-  preconDefault: false,
-  preconInputMethod: "toggle-per-session",
 };

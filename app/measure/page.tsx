@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useChargeSession } from "@/lib/polling/ChargeSessionContext";
+import { detectPreconditioned } from "@/lib/polling/chargeStateMachine";
 import { ChargeStatusBar } from "@/components/measure/ChargeStatusBar";
 import { LiveStatsPanel } from "@/components/measure/LiveStatsPanel";
 import { ChargeChartsGrid } from "@/components/charts/ChargeChartsGrid";
@@ -11,8 +12,7 @@ import { Card } from "@/components/ui/Card";
 
 export default function MeasurePage() {
   const router = useRouter();
-  const { state, togglePrecon, changeLocationOverride, cancelMeasurement, pollNow } =
-    useChargeSession();
+  const { state, changeLocationOverride, cancelMeasurement, pollNow } = useChargeSession();
   const [useFakeTeslaApi, setUseFakeTeslaApi] = useState(false);
   const [vehicleName, setVehicleName] = useState<string | null>(null);
 
@@ -56,6 +56,7 @@ export default function MeasurePage() {
 
   const isWaiting = state.status === "waitingForCable";
   const latest = state.status === "charging" ? state.logPoints[state.logPoints.length - 1] : null;
+  const preconditioned = state.status === "charging" ? detectPreconditioned(state.logPoints) : null;
 
   return (
     <div className="mx-auto flex w-full max-w-[1680px] flex-col gap-3">
@@ -70,8 +71,7 @@ export default function MeasurePage() {
         <LiveStatsPanel
           latest={latest}
           startPayload={state.startPayload}
-          precon={state.precon}
-          onPreconChange={togglePrecon}
+          preconditioned={preconditioned}
           locationOverride={state.locationOverride}
           onLocationChange={changeLocationOverride}
           chargeLimitSoc={state.chargeLimitSoc}
@@ -90,7 +90,7 @@ export default function MeasurePage() {
           <ChargeChartsGrid
             logPoints={state.logPoints}
             minutesToFull={latest!.minutesToFull}
-            precon={state.precon}
+            precon={preconditioned ?? true}
             fastChargerPresent={state.startPayload.fastChargerPresent}
           />
         )}

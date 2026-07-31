@@ -42,7 +42,7 @@ export interface ChargeSessionRepository {
     sessionId: string,
     point: Omit<LogPoint, "id" | "sessionId">
   ): Promise<void>;
-  markActive(sessionId: string, preconditioned: boolean | null): Promise<void>;
+  markActive(sessionId: string): Promise<void>;
   completeSession(sessionId: string, input: CompleteSessionInput): Promise<void>;
   abortSession(sessionId: string): Promise<void>;
   listSessions(): Promise<ChargeSession[]>;

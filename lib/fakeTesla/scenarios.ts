@@ -18,6 +18,9 @@ export interface FakeScenario {
   /** miles — Tesla's API unit */
   startOdometer: number;
   outsideTempC: number;
+  /** whether the pack was cold enough at plug-in that the heater runs for a while
+   * after charging starts — see fakeGetVehicleData's battery_heater_on simulation. */
+  batteryHeaterOnAtStart: boolean;
   /** how many simulated seconds pass per one real second (time compression for dev testing) */
   simulatedSecondsPerRealSecond: number;
   /** exercise the wake_up/408 code path for the first poll */
@@ -47,6 +50,7 @@ export const FAKE_SCENARIOS: FakeScenario[] = [
     batteryCapacityKwh: 75,
     startOdometer: 12000,
     outsideTempC: 24,
+    batteryHeaterOnAtStart: false,
     simulatedSecondsPerRealSecond: 60,
   },
   {
@@ -68,6 +72,7 @@ export const FAKE_SCENARIOS: FakeScenario[] = [
     batteryCapacityKwh: 75,
     startOdometer: 24310,
     outsideTempC: 8,
+    batteryHeaterOnAtStart: true,
     simulatedSecondsPerRealSecond: 60,
   },
   {
@@ -86,6 +91,7 @@ export const FAKE_SCENARIOS: FakeScenario[] = [
     batteryCapacityKwh: 75,
     startOdometer: 18500,
     outsideTempC: 18,
+    batteryHeaterOnAtStart: false,
     simulatedSecondsPerRealSecond: 60,
     interruptAfterSoc: 55,
   },
@@ -105,6 +111,7 @@ export const FAKE_SCENARIOS: FakeScenario[] = [
     batteryCapacityKwh: 75,
     startOdometer: 9800,
     outsideTempC: 20,
+    batteryHeaterOnAtStart: false,
     simulatedSecondsPerRealSecond: 60,
     injectAsleepAtStart: true,
   },
@@ -124,6 +131,7 @@ export const FAKE_SCENARIOS: FakeScenario[] = [
     batteryCapacityKwh: 75,
     startOdometer: 5000,
     outsideTempC: 22,
+    batteryHeaterOnAtStart: false,
     simulatedSecondsPerRealSecond: 60,
     injectAuthErrorAfterPolls: 3,
   },
@@ -143,6 +151,7 @@ export const FAKE_SCENARIOS: FakeScenario[] = [
     batteryCapacityKwh: 75,
     startOdometer: 30250,
     outsideTempC: 15,
+    batteryHeaterOnAtStart: false,
     simulatedSecondsPerRealSecond: 60,
     injectRateLimitAfterPolls: 5,
   },

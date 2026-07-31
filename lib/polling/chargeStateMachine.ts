@@ -18,7 +18,30 @@ export function toLogPointDraft(
     energyAddedKwh: payload.energyAddedKwh,
     minutesToFull: payload.minutesToFull,
     chargingState: payload.chargingState,
+    batteryHeaterOn: payload.batteryHeaterOn,
   };
+}
+
+/** Same window as derive.ts's DC_NO_PRECON_WARMUP_SEC — how long a cold pack's
+ * heater is expected to run after charging starts. */
+const PRECON_DETECTION_WINDOW_SEC = 8 * 60;
+
+/**
+ * Auto-detects whether the battery was already warm when charging began, from
+ * the vehicle's own battery_heater_on telemetry — replaces what used to be a
+ * manual per-session toggle.
+ *
+ * - Heater seen on at any point in the first 8 minutes → not preconditioned (false),
+ *   decided as soon as it's observed.
+ * - 8 minutes pass with the heater never on → preconditioned (true).
+ * - Otherwise (still early, heater not yet seen on) → undetermined (null).
+ */
+export function detectPreconditioned(logPoints: LogPointDraft[]): boolean | null {
+  const earlyPoints = logPoints.filter((p) => p.elapsedSeconds <= PRECON_DETECTION_WINDOW_SEC);
+  if (earlyPoints.some((p) => p.batteryHeaterOn)) return false;
+  const latest = logPoints[logPoints.length - 1];
+  if (latest && latest.elapsedSeconds >= PRECON_DETECTION_WINDOW_SEC) return true;
+  return null;
 }
 
 /** User's manual correction of where/what this session is charging at. */
@@ -34,7 +57,6 @@ export type ChargeMachineState =
       status: "waitingForCable";
       sessionId: string;
       startPayload: ChargeStatusPayload;
-      precon: boolean;
       locationOverride: LocationOverride | null;
       /** percent — the vehicle's actual charge-limit setting, kept in sync via POLL_SUCCESS. */
       chargeLimitSoc: number;
@@ -45,7 +67,6 @@ export type ChargeMachineState =
       status: "charging";
       sessionId: string;
       startPayload: ChargeStatusPayload;
-      precon: boolean;
       locationOverride: LocationOverride | null;
       chargeLimitSoc: number;
       chargingStartedAt: number;
@@ -64,11 +85,9 @@ export type ChargeMachineEvent =
       type: "START_PRESSED";
       sessionId: string;
       payload: ChargeStatusPayload;
-      preconDefault: boolean;
     }
   | { type: "POLL_SUCCESS"; payload: ChargeStatusPayload }
   | { type: "POLL_ERROR"; message: string }
-  | { type: "PRECON_TOGGLED"; value: boolean }
   | { type: "LOCATION_OVERRIDE_CHANGED"; value: LocationOverride | null }
   | { type: "SESSION_FINISHED"; sessionId: string; summary: CompleteSessionInput }
   | { type: "RESET" };
@@ -98,17 +117,11 @@ export function chargeMachineReducer(
         status: "waitingForCable",
         sessionId: event.sessionId,
         startPayload: event.payload,
-        precon: event.preconDefault,
         locationOverride: null,
         chargeLimitSoc: event.payload.chargeLimitSoc,
         consecutiveErrors: 0,
         lastErrorMessage: null,
       };
-    }
-
-    case "PRECON_TOGGLED": {
-      if (state.status !== "waitingForCable" && state.status !== "charging") return state;
-      return { ...state, precon: event.value };
     }
 
     case "LOCATION_OVERRIDE_CHANGED": {
@@ -123,7 +136,6 @@ export function chargeMachineReducer(
             status: "charging",
             sessionId: state.sessionId,
             startPayload: state.startPayload,
-            precon: state.precon,
             locationOverride: state.locationOverride,
             chargeLimitSoc: event.payload.chargeLimitSoc,
             chargingStartedAt: event.payload.timestamp,

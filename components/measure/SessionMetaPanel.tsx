@@ -23,16 +23,15 @@ export function SessionMetaPanel({
   startPayload,
   locationOverride,
   onLocationChange,
-  precon,
-  onPreconChange,
+  preconditioned,
   latest,
   chargeLimitSoc,
 }: {
   startPayload: ChargeStatusPayload;
   locationOverride: LocationOverride | null;
   onLocationChange: (value: LocationOverride | null) => void;
-  precon: boolean;
-  onPreconChange: (value: boolean) => void;
+  /** null while still undetermined (auto-detected from battery_heater_on — see detectPreconditioned). */
+  preconditioned: boolean | null;
   /** null while still waiting for the cable — the speed/energy/ETA rows show "-". */
   latest: LogPointDraft | null;
   /** percent — the vehicle's own charge-limit setting, read-only (may change on the car itself mid-charge; kept in sync via polling). */
@@ -119,26 +118,9 @@ export function SessionMetaPanel({
             <SnowflakeIcon className="h-3.5 w-3.5" />
             プレコンディショニング
           </span>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={precon}
-            aria-label="プレコンディショニングを実施した"
-            onClick={() => onPreconChange(!precon)}
-            className="flex min-h-8 min-w-11 shrink-0 items-center justify-center"
-          >
-            <span
-              className={`relative h-6 w-10 rounded-full transition-colors ${
-                precon ? "bg-accent" : "bg-surface-raised border border-hairline"
-              }`}
-            >
-              <span
-                className={`absolute top-0.5 left-0.5 block h-5 w-5 rounded-full bg-white transition-transform ${
-                  precon ? "translate-x-4" : ""
-                }`}
-              />
-            </span>
-          </button>
+          <span className="font-medium text-ink">
+            {preconditioned === null ? "判定中..." : preconditioned ? "あり" : "なし"}
+          </span>
         </div>
         <div className="flex justify-between border-b border-hairline pb-2">
           <span className="text-ink-dim">充電上限</span>
