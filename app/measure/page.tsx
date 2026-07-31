@@ -11,7 +11,7 @@ import { Card } from "@/components/ui/Card";
 
 export default function MeasurePage() {
   const router = useRouter();
-  const { state, togglePrecon, changeLocationOverride, cancelMeasurement, pollNow } =
+  const { state, togglePrecon, changeLocationOverride, setChargeLimit, cancelMeasurement, pollNow } =
     useChargeSession();
   const [useFakeTeslaApi, setUseFakeTeslaApi] = useState(false);
   const [vehicleName, setVehicleName] = useState<string | null>(null);
@@ -74,6 +74,8 @@ export default function MeasurePage() {
           onPreconChange={togglePrecon}
           locationOverride={state.locationOverride}
           onLocationChange={changeLocationOverride}
+          chargeLimitSoc={state.chargeLimitSoc}
+          onChargeLimitChange={setChargeLimit}
         />
 
         {isWaiting ? (

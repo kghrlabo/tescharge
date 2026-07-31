@@ -36,6 +36,8 @@ export type ChargeMachineState =
       startPayload: ChargeStatusPayload;
       precon: boolean;
       locationOverride: LocationOverride | null;
+      /** percent — the vehicle's actual charge-limit setting, kept in sync via POLL_SUCCESS. */
+      chargeLimitSoc: number;
       consecutiveErrors: number;
       lastErrorMessage: string | null;
     }
@@ -45,6 +47,7 @@ export type ChargeMachineState =
       startPayload: ChargeStatusPayload;
       precon: boolean;
       locationOverride: LocationOverride | null;
+      chargeLimitSoc: number;
       chargingStartedAt: number;
       logPoints: LogPointDraft[];
       consecutiveErrors: number;
@@ -67,6 +70,7 @@ export type ChargeMachineEvent =
   | { type: "POLL_ERROR"; message: string }
   | { type: "PRECON_TOGGLED"; value: boolean }
   | { type: "LOCATION_OVERRIDE_CHANGED"; value: LocationOverride | null }
+  | { type: "CHARGE_LIMIT_CHANGED"; value: number }
   | { type: "SESSION_FINISHED"; sessionId: string; summary: CompleteSessionInput }
   | { type: "RESET" };
 
@@ -97,6 +101,7 @@ export function chargeMachineReducer(
         startPayload: event.payload,
         precon: event.preconDefault,
         locationOverride: null,
+        chargeLimitSoc: event.payload.chargeLimitSoc,
         consecutiveErrors: 0,
         lastErrorMessage: null,
       };
@@ -112,6 +117,11 @@ export function chargeMachineReducer(
       return { ...state, locationOverride: event.value };
     }
 
+    case "CHARGE_LIMIT_CHANGED": {
+      if (state.status !== "waitingForCable" && state.status !== "charging") return state;
+      return { ...state, chargeLimitSoc: event.value };
+    }
+
     case "POLL_SUCCESS": {
       if (state.status === "waitingForCable") {
         if (event.payload.chargingState === "Charging") {
@@ -121,13 +131,19 @@ export function chargeMachineReducer(
             startPayload: state.startPayload,
             precon: state.precon,
             locationOverride: state.locationOverride,
+            chargeLimitSoc: event.payload.chargeLimitSoc,
             chargingStartedAt: event.payload.timestamp,
             logPoints: [toLogPointDraft(event.payload, 0)],
             consecutiveErrors: 0,
             lastErrorMessage: null,
           };
         }
-        return { ...state, consecutiveErrors: 0, lastErrorMessage: null };
+        return {
+          ...state,
+          chargeLimitSoc: event.payload.chargeLimitSoc,
+          consecutiveErrors: 0,
+          lastErrorMessage: null,
+        };
       }
 
       if (state.status === "charging") {
@@ -137,6 +153,7 @@ export function chargeMachineReducer(
         );
         return {
           ...state,
+          chargeLimitSoc: event.payload.chargeLimitSoc,
           logPoints: [...state.logPoints, toLogPointDraft(event.payload, elapsedSeconds)],
           consecutiveErrors: 0,
           lastErrorMessage: null,

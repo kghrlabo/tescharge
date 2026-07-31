@@ -21,7 +21,7 @@ import {
   fakeRefreshAccessToken,
   fakeListVehicles,
 } from "../fakeTesla/fakeAuth";
-import { fakeWakeUp, fakeGetVehicleData } from "../fakeTesla/fakeVehicleData";
+import { fakeWakeUp, fakeGetVehicleData, fakeSetChargeLimit } from "../fakeTesla/fakeVehicleData";
 
 export function buildAuthorizeUrl(state: string): string {
   const params = new URLSearchParams({
@@ -131,6 +131,37 @@ export async function wakeUp(
   const res = await fetch(
     `${fleetApiBaseUrl}/api/1/vehicles/${vehicleId}/wake_up`,
     { method: "POST", headers: { Authorization: `Bearer ${accessToken}` } }
+  );
+  if (!res.ok) throw mapErrorResponse(res);
+}
+
+/**
+ * The one write command this app sends. On the real Fleet API, most 2021+ vehicles
+ * are on the Tesla Vehicle Command Protocol and reject unsigned command requests
+ * (403) — proper support needs the signed-command flow (protobuf + a paired key,
+ * e.g. via Tesla's `vehicle-command` proxy), which isn't implemented here. This is
+ * a plain bearer-token REST POST, same best-effort level as the rest of this
+ * client; verify against a real account and add signing if it turns out to be
+ * required for the target vehicle.
+ */
+export async function setChargeLimit(
+  accessToken: string,
+  fleetApiBaseUrl: string,
+  vehicleId: number,
+  percent: number
+): Promise<void> {
+  if (useFakeTeslaApi) return fakeSetChargeLimit(percent);
+
+  const res = await fetch(
+    `${fleetApiBaseUrl}/api/1/vehicles/${vehicleId}/command/set_charge_limit`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ percent }),
+    }
   );
   if (!res.ok) throw mapErrorResponse(res);
 }

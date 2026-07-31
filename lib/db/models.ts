@@ -27,6 +27,8 @@ export interface ChargeSession {
   fastChargerType: string | null;
   fastChargerBrand: string | null;
   preconditioned: boolean | null;
+  /** percent — the vehicle's charge-limit setting as of session completion; null for sessions recorded before this field existed */
+  chargeLimitSoc: number | null;
   avgKw: number | null;
   maxKw: number | null;
   durationMinutes: number | null;

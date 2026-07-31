@@ -1,14 +1,20 @@
 export const TESLA_AUTH_BASE_URL = "https://auth.tesla.com/oauth2/v3";
 
 /**
- * We only ever read data — no vehicle_cmds/vehicle_charging_cmds scope is requested
- * because this app never sends commands to the car.
+ * Mostly read-only: `vehicle_charging_cmds` is requested only for set_charge_limit
+ * (the charge-limit control on the measuring screen). No broader `vehicle_cmds`
+ * scope is requested since nothing else in this app sends commands to the car.
+ *
+ * Accounts that connected before this scope was added won't have it on their stored
+ * token — they'll need to disconnect/reconnect in Settings before the charge-limit
+ * control will work against the real API.
  */
 export const TESLA_SCOPES = [
   "openid",
   "offline_access",
   "vehicle_device_data",
   "vehicle_location",
+  "vehicle_charging_cmds",
 ];
 
 export const teslaEnv = {

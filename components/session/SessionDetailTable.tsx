@@ -60,6 +60,10 @@ export function SessionDetailTable({
           label="プレコン有無"
           value={session.preconditioned === null ? "-" : session.preconditioned ? "あり" : "なし"}
         />
+        <Row
+          label="充電上限"
+          value={session.chargeLimitSoc != null ? `${session.chargeLimitSoc}%` : "-"}
+        />
         <Row label="最大充電速度" value={session.maxKw != null ? formatKw(session.maxKw) : "-"} />
         <Row
           label="走行距離"

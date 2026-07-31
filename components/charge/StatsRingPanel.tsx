@@ -35,11 +35,14 @@ export function StatsRingPanel({
   soc,
   startSoc = 0,
   ringSubLabel,
+  belowBar,
   children,
 }: {
   soc: number;
   startSoc?: number;
   ringSubLabel?: ReactNode;
+  /** Live-only controls (e.g. the charge-limit buttons) — always visible, not gated by the collapse toggle. */
+  belowBar?: ReactNode;
   children?: ReactNode;
 }) {
   const isDesktop = useSyncExternalStore(
@@ -78,6 +81,7 @@ export function StatsRingPanel({
           )}
         </div>
         <SessionSocBar startSoc={startSoc} endSoc={soc} />
+        {belowBar}
       </div>
       {expanded && children}
     </Card>

@@ -1,5 +1,6 @@
 import { StatsRingPanel } from "@/components/charge/StatsRingPanel";
 import { SessionMetaPanel } from "./SessionMetaPanel";
+import { ChargeLimitPresetButtons } from "./ChargeLimitPresetButtons";
 import type { LogPointDraft, LocationOverride } from "@/lib/polling/chargeStateMachine";
 import type { ChargeStatusPayload } from "@/lib/tesla/types";
 
@@ -26,6 +27,8 @@ export function LiveStatsPanel({
   onPreconChange,
   locationOverride,
   onLocationChange,
+  chargeLimitSoc,
+  onChargeLimitChange,
 }: {
   latest: LogPointDraft | null;
   startPayload: ChargeStatusPayload;
@@ -33,6 +36,10 @@ export function LiveStatsPanel({
   onPreconChange: (value: boolean) => void;
   locationOverride: LocationOverride | null;
   onLocationChange: (value: LocationOverride | null) => void;
+  chargeLimitSoc: number;
+  onChargeLimitChange: (
+    percent: number
+  ) => Promise<{ ok: true } | { ok: false; error: string }>;
 }) {
   const detail = (
     <SessionMetaPanel
@@ -45,9 +52,18 @@ export function LiveStatsPanel({
     />
   );
 
+  const chargeLimitButtons = (
+    <ChargeLimitPresetButtons value={chargeLimitSoc} onChange={onChargeLimitChange} />
+  );
+
   if (!latest) {
     return (
-      <StatsRingPanel soc={startPayload.soc} startSoc={startPayload.soc} ringSubLabel="ケーブル接続待ち">
+      <StatsRingPanel
+        soc={startPayload.soc}
+        startSoc={startPayload.soc}
+        ringSubLabel="ケーブル接続待ち"
+        belowBar={chargeLimitButtons}
+      >
         {detail}
       </StatsRingPanel>
     );
@@ -58,6 +74,7 @@ export function LiveStatsPanel({
       soc={latest.soc}
       startSoc={startPayload.soc}
       ringSubLabel={RING_STATE_LABEL[latest.chargingState] ?? "充電中"}
+      belowBar={chargeLimitButtons}
     >
       {detail}
     </StatsRingPanel>

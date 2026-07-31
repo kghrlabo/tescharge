@@ -24,6 +24,7 @@ export interface CompleteSessionInput {
   fastChargerType: string | null;
   fastChargerBrand: string | null;
   preconditioned: boolean | null;
+  chargeLimitSoc: number | null;
   avgKw: number;
   maxKw: number;
   durationMinutes: number;
