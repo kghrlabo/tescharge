@@ -5,9 +5,8 @@ import { SessionSocBar } from "./SessionSocBar";
 import type { ChargeSession } from "@/lib/db/models";
 
 const LOCATION_LABEL: Record<string, string> = {
-  home: "自宅",
   charger: "充電器",
-  other: "その他",
+  other: "未設定",
 };
 
 function Stat({ value, label }: { value: string; label: string }) {

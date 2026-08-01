@@ -2,13 +2,8 @@
 
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import type { ChargeStatusPayload } from "../tesla/types";
-import {
-  chargeSessionRepository,
-  settingsRepository,
-  chargerRepository,
-} from "../db/repositories";
+import { chargeSessionRepository, settingsRepository } from "../db/repositories";
 import type { CompleteSessionInput } from "../db/repositories/ChargeSessionRepository";
-import { classifyLocation } from "../location/classify";
 import { milesToKm } from "../format";
 import {
   chargeMachineReducer,
@@ -41,22 +36,9 @@ async function buildCompleteInput(
   current: Extract<ChargeMachineState, { status: "charging" }>,
   payload: ChargeStatusPayload
 ): Promise<CompleteSessionInput> {
-  let locationType = current.locationOverride?.type ?? null;
-  let chargerId = current.locationOverride?.chargerId ?? null;
+  const locationType = current.locationOverride?.type ?? "other";
+  const chargerId = current.locationOverride?.chargerId ?? null;
   const chargerNameManual = current.locationOverride?.chargerNameManual ?? null;
-
-  if (!current.locationOverride) {
-    const settings = await settingsRepository.getSettings();
-    const chargers = await chargerRepository.list();
-    const loc = classifyLocation(
-      current.startPayload.latitude,
-      current.startPayload.longitude,
-      settings,
-      chargers
-    );
-    locationType = loc.locationType;
-    chargerId = loc.chargerId;
-  }
 
   const kwValues = current.logPoints.map((p) => p.chargerPowerKw).filter((v) => v > 0);
   const maxKw = kwValues.length ? Math.max(...kwValues) : 0;
@@ -72,7 +54,7 @@ async function buildCompleteInput(
     endOdometerKm: milesToKm(payload.odometerMiles),
     endRangeKm: milesToKm(payload.rangeMiles),
     endOutsideTempC: payload.outsideTempC,
-    locationType: locationType ?? "other",
+    locationType,
     chargerId,
     chargerNameManual,
     acOrDc: current.startPayload.fastChargerPresent ? "DC" : "AC",

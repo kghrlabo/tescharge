@@ -1,5 +1,5 @@
 export type SessionStatus = "waiting" | "active" | "complete" | "aborted";
-export type LocationType = "home" | "charger" | "other";
+export type LocationType = "charger" | "other";
 export type AcOrDc = "AC" | "DC";
 
 export interface ChargeSession {
@@ -61,21 +61,13 @@ export interface AppSettings {
   id: "app-settings";
   pollIntervalSec: 30 | 60;
   retentionDays: number;
-  electricityRatePerKwh: number | null;
-  homeLat: number | null;
-  homeLng: number | null;
-  homeRadiusM: number;
+  /** internal bookkeeping — set true once the charger master's default rows have been inserted. */
+  chargersSeeded: boolean;
 }
 
 export interface Charger {
   id: string;
   name: string;
-  lat: number;
-  lng: number;
-  type: AcOrDc;
-  maxKw: number;
-  brand: string | null;
-  notes: string | null;
   createdAt: number;
   updatedAt: number;
 }
@@ -84,8 +76,5 @@ export const DEFAULT_SETTINGS: AppSettings = {
   id: "app-settings",
   pollIntervalSec: 30,
   retentionDays: 365,
-  electricityRatePerKwh: null,
-  homeLat: null,
-  homeLng: null,
-  homeRadiusM: 150,
+  chargersSeeded: false,
 };

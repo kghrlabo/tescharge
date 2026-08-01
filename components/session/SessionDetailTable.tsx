@@ -3,9 +3,8 @@ import { formatDateTime, formatDurationMinutes, formatKw, formatKwh } from "@/li
 import type { ChargeSession, Charger } from "@/lib/db/models";
 
 const LOCATION_LABEL: Record<string, string> = {
-  home: "自宅",
   charger: "充電器",
-  other: "その他",
+  other: "未設定",
 };
 
 function Row({ label, value }: { label: string; value: ReactNode }) {

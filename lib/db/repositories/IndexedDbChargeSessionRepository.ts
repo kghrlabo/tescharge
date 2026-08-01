@@ -129,10 +129,4 @@ export class IndexedDbChargeSessionRepository implements ChargeSessionRepository
     });
     return stale.length;
   }
-
-  async getLatestCompleteSession(): Promise<ChargeSession | null> {
-    const completed = await getDb().sessions.where("status").equals("complete").toArray();
-    if (completed.length === 0) return null;
-    return completed.reduce((latest, s) => (s.startedAt > latest.startedAt ? s : latest));
-  }
 }

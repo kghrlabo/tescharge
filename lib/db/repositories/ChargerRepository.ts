@@ -1,21 +1,35 @@
 import { v4 as uuidv4 } from "uuid";
 import { getDb } from "../db";
-import type { Charger } from "../models";
-import { haversineDistanceMeters } from "../../location/geo";
+import { DEFAULT_SETTINGS, type Charger } from "../models";
 
-export type ChargerInput = Omit<Charger, "id" | "createdAt" | "updatedAt">;
+export type ChargerInput = Pick<Charger, "name">;
 
 export interface ChargerRepository {
   list(): Promise<Charger[]>;
   create(input: ChargerInput): Promise<Charger>;
   update(id: string, patch: Partial<ChargerInput>): Promise<void>;
   delete(id: string): Promise<void>;
-  /** Nearest charger within `maxDistanceM`, or null if none registered within range. */
-  findNearest(lat: number, lng: number, maxDistanceM?: number): Promise<Charger | null>;
 }
 
+const SEED_CHARGERS: Omit<Charger, "createdAt" | "updatedAt">[] = [
+  { id: "seed-home", name: "自宅" },
+  { id: "seed-sc-150", name: "SC 最大150 kW" },
+  { id: "seed-sc-250", name: "SC 最大250 kW" },
+];
+
 export class IndexedDbChargerRepository implements ChargerRepository {
+  private async ensureSeeded(): Promise<void> {
+    const db = getDb();
+    const settings = (await db.settings.get("app-settings")) ?? DEFAULT_SETTINGS;
+    if (settings.chargersSeeded) return;
+
+    const now = Date.now();
+    await db.chargers.bulkAdd(SEED_CHARGERS.map((c) => ({ ...c, createdAt: now, updatedAt: now })));
+    await db.settings.put({ ...settings, chargersSeeded: true });
+  }
+
   async list(): Promise<Charger[]> {
+    await this.ensureSeeded();
     return getDb().chargers.orderBy("name").toArray();
   }
 
@@ -32,23 +46,5 @@ export class IndexedDbChargerRepository implements ChargerRepository {
 
   async delete(id: string): Promise<void> {
     await getDb().chargers.delete(id);
-  }
-
-  async findNearest(
-    lat: number,
-    lng: number,
-    maxDistanceM = 200
-  ): Promise<Charger | null> {
-    const all = await this.list();
-    let nearest: Charger | null = null;
-    let nearestDist = Infinity;
-    for (const charger of all) {
-      const dist = haversineDistanceMeters(lat, lng, charger.lat, charger.lng);
-      if (dist < nearestDist) {
-        nearestDist = dist;
-        nearest = charger;
-      }
-    }
-    return nearest && nearestDist <= maxDistanceM ? nearest : null;
   }
 }

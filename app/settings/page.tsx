@@ -8,7 +8,6 @@ import type { ChargerInput } from "@/lib/db/repositories/ChargerRepository";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { PollIntervalSelect } from "@/components/settings/PollIntervalSelect";
-import { HomeLocationField, type HomeLocationPatch } from "@/components/settings/HomeLocationField";
 import { ChargerMasterList } from "@/components/settings/ChargerMasterList";
 
 interface AuthStatus {
@@ -50,7 +49,7 @@ export default function SettingsPage() {
     chargerRepository.list().then(setChargers);
   }, []);
 
-  const updateSettings = async (patch: Partial<Omit<AppSettings, "id">> | HomeLocationPatch) => {
+  const updateSettings = async (patch: Partial<Omit<AppSettings, "id">>) => {
     const updated = await settingsRepository.updateSettings(patch);
     setSettings(updated);
   };
@@ -62,6 +61,11 @@ export default function SettingsPage() {
 
   const handleCreateCharger = async (input: ChargerInput) => {
     await chargerRepository.create(input);
+    setChargers(await chargerRepository.list());
+  };
+
+  const handleRenameCharger = async (id: string, name: string) => {
+    await chargerRepository.update(id, { name });
     setChargers(await chargerRepository.list());
   };
 
@@ -140,40 +144,12 @@ export default function SettingsPage() {
       </Card>
 
       <Card>
-        <h2 className="text-sm font-semibold text-ink">電気料金</h2>
-        <div className="mt-2 flex items-center gap-2">
-          <input
-            type="number"
-            value={settings.electricityRatePerKwh ?? ""}
-            onChange={(e) =>
-              updateSettings({
-                electricityRatePerKwh: e.target.value === "" ? null : Number(e.target.value),
-              })
-            }
-            className="min-h-11 w-32 rounded-chip border border-hairline bg-surface-raised px-2 py-1.5 text-sm text-ink"
-          />
-          <span className="text-sm text-ink-faint">円/kWh</span>
-        </div>
-      </Card>
-
-      <Card>
-        <h2 className="text-sm font-semibold text-ink">自宅位置</h2>
-        <div className="mt-2">
-          <HomeLocationField
-            lat={settings.homeLat}
-            lng={settings.homeLng}
-            radiusM={settings.homeRadiusM}
-            onChange={updateSettings}
-          />
-        </div>
-      </Card>
-
-      <Card>
-        <h2 className="text-sm font-semibold text-ink">充電器名称（マスタ）</h2>
+        <h2 className="text-sm font-semibold text-ink">場所マスタ</h2>
         <div className="mt-2">
           <ChargerMasterList
             chargers={chargers}
             onCreate={handleCreateCharger}
+            onRename={handleRenameCharger}
             onDelete={handleDeleteCharger}
           />
         </div>

@@ -6,121 +6,86 @@ import type { Charger } from "@/lib/db/models";
 import type { ChargerInput } from "@/lib/db/repositories/ChargerRepository";
 
 const inputClass =
-  "min-h-11 rounded-chip border border-hairline bg-surface-raised px-2 py-1.5 text-sm text-ink";
+  "min-h-11 w-full rounded-chip border border-hairline bg-surface-raised px-2 py-1.5 text-sm text-ink";
+
+function ChargerRow({
+  charger,
+  onRename,
+  onDelete,
+}: {
+  charger: Charger;
+  onRename: (name: string) => Promise<void>;
+  onDelete: () => Promise<void>;
+}) {
+  const [name, setName] = useState(charger.name);
+
+  const commit = () => {
+    const trimmed = name.trim();
+    if (trimmed && trimmed !== charger.name) {
+      onRename(trimmed);
+    } else {
+      setName(charger.name);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        onBlur={commit}
+        className={inputClass}
+      />
+      <button
+        type="button"
+        onClick={onDelete}
+        className="shrink-0 text-xs text-danger hover:underline"
+      >
+        削除
+      </button>
+    </div>
+  );
+}
 
 export function ChargerMasterList({
   chargers,
   onCreate,
+  onRename,
   onDelete,
 }: {
   chargers: Charger[];
   onCreate: (input: ChargerInput) => Promise<void>;
+  onRename: (id: string, name: string) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
 }) {
-  const [name, setName] = useState("");
-  const [lat, setLat] = useState("");
-  const [lng, setLng] = useState("");
-  const [type, setType] = useState<"AC" | "DC">("AC");
-  const [maxKw, setMaxKw] = useState("");
-  const [geoError, setGeoError] = useState<string | null>(null);
-
-  const useCurrentLocation = () => {
-    if (!("geolocation" in navigator)) {
-      setGeoError("この端末では位置情報を取得できません");
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setGeoError(null);
-        setLat(String(pos.coords.latitude));
-        setLng(String(pos.coords.longitude));
-      },
-      () => setGeoError("位置情報の取得に失敗しました")
-    );
-  };
+  const [newName, setNewName] = useState("");
 
   const handleAdd = async () => {
-    if (!name || !lat || !lng || !maxKw) return;
-    await onCreate({
-      name,
-      lat: Number(lat),
-      lng: Number(lng),
-      type,
-      maxKw: Number(maxKw),
-      brand: null,
-      notes: null,
-    });
-    setName("");
-    setLat("");
-    setLng("");
-    setMaxKw("");
+    const trimmed = newName.trim();
+    if (!trimmed) return;
+    await onCreate({ name: trimmed });
+    setNewName("");
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2">
       {chargers.map((c) => (
-        <div
+        <ChargerRow
           key={c.id}
-          className="flex items-center justify-between rounded-chip border border-hairline p-2 text-sm"
-        >
-          <div>
-            <p className="font-medium text-ink">{c.name}</p>
-            <p className="text-xs text-ink-faint">
-              {c.type} / 最大{c.maxKw}kW
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => onDelete(c.id)}
-            className="text-xs text-danger hover:underline"
-          >
-            削除
-          </button>
-        </div>
+          charger={c}
+          onRename={(name) => onRename(c.id, name)}
+          onDelete={() => onDelete(c.id)}
+        />
       ))}
-      <div className="grid grid-cols-2 gap-2 rounded-chip border border-dashed border-hairline p-3">
+      <div className="mt-1 flex items-center gap-2">
         <input
-          placeholder="名称"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className={`col-span-2 ${inputClass}`}
-        />
-        <input
-          placeholder="緯度"
-          value={lat}
-          onChange={(e) => setLat(e.target.value)}
+          placeholder="名称を追加"
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleAdd()}
           className={inputClass}
         />
-        <input
-          placeholder="経度"
-          value={lng}
-          onChange={(e) => setLng(e.target.value)}
-          className={inputClass}
-        />
-        <select
-          value={type}
-          onChange={(e) => setType(e.target.value as "AC" | "DC")}
-          className={inputClass}
-        >
-          <option value="AC">AC</option>
-          <option value="DC">DC</option>
-        </select>
-        <input
-          placeholder="最大kW"
-          value={maxKw}
-          onChange={(e) => setMaxKw(e.target.value)}
-          className={inputClass}
-        />
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={useCurrentLocation}
-          className="col-span-2"
-        >
-          現在地を使用
-        </Button>
-        {geoError && <p className="col-span-2 text-xs text-danger">{geoError}</p>}
-        <Button type="button" variant="secondary" onClick={handleAdd} className="col-span-2">
+        <Button type="button" variant="secondary" onClick={handleAdd} className="shrink-0 px-3 py-1.5 text-xs">
           追加
         </Button>
       </div>

@@ -52,5 +52,4 @@ export interface ChargeSessionRepository {
   ): Promise<{ session: ChargeSession; logPoints: LogPoint[] } | null>;
   deleteSession(sessionId: string): Promise<void>;
   pruneOlderThan(days: number): Promise<number>;
-  getLatestCompleteSession(): Promise<ChargeSession | null>;
 }

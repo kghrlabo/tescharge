@@ -1,7 +1,6 @@
 "use client";
 
 import { milesToKm, formatDateTime, formatTime } from "@/lib/format";
-import { SnowflakeIcon } from "@/components/ui/icons";
 import { LocationSelectField } from "./LocationSelectField";
 import type { ChargeStatusPayload } from "@/lib/tesla/types";
 import type { LocationOverride, LogPointDraft } from "@/lib/polling/chargeStateMachine";
@@ -65,10 +64,7 @@ export function SessionMetaPanel({
           </span>
         </div>
         <div className="flex items-center justify-between border-b border-hairline pb-2">
-          <span className="flex items-center gap-1.5 text-ink-dim">
-            <SnowflakeIcon className="h-3.5 w-3.5" />
-            プレコンディショニング
-          </span>
+          <span className="text-ink-dim">プレコンディショニング</span>
           <span className="font-medium text-ink">
             {preconditioned === null ? "判定中..." : preconditioned ? "あり" : "なし"}
           </span>
@@ -79,12 +75,7 @@ export function SessionMetaPanel({
         </div>
       </div>
 
-      <LocationSelectField
-        latitude={startPayload.latitude}
-        longitude={startPayload.longitude}
-        value={locationOverride}
-        onChange={onLocationChange}
-      />
+      <LocationSelectField value={locationOverride} onChange={onLocationChange} />
     </div>
   );
 }

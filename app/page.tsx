@@ -5,11 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { SessionSummaryCard } from "@/components/session/SessionSummaryCard";
 import { LocationSelectField } from "@/components/measure/LocationSelectField";
 import { useChargeSession } from "@/lib/polling/ChargeSessionContext";
-import { chargeSessionRepository } from "@/lib/db/repositories";
-import type { ChargeSession } from "@/lib/db/models";
 import type { LocationOverride } from "@/lib/polling/chargeStateMachine";
 
 interface AuthStatus {
@@ -17,19 +14,12 @@ interface AuthStatus {
   vehicleName: string | null;
 }
 
-interface LiveVehicleState {
-  soc: number;
-  latitude: number | null;
-  longitude: number | null;
-}
-
 export default function HomePage() {
   const router = useRouter();
   const { state, startMeasurement } = useChargeSession();
   const [authStatus, setAuthStatus] = useState<AuthStatus | null>(null);
-  const [liveVehicle, setLiveVehicle] = useState<LiveVehicleState | null>(null);
+  const [liveSoc, setLiveSoc] = useState<number | null>(null);
   const [socError, setSocError] = useState<string | null>(null);
-  const [latestSession, setLatestSession] = useState<ChargeSession | null>(null);
   const [starting, setStarting] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
   const [locationOverride, setLocationOverride] = useState<LocationOverride | null>(null);
@@ -40,13 +30,6 @@ export default function HomePage() {
       .then((res) => res.json())
       .then(setAuthStatus)
       .catch(() => setAuthStatus({ connected: false, vehicleName: null }));
-  }, []);
-
-  useEffect(() => {
-    chargeSessionRepository
-      .getLatestCompleteSession()
-      .then(setLatestSession)
-      .catch(() => {});
   }, []);
 
   const fetchLiveSoc = useCallback(() => {
@@ -61,7 +44,7 @@ export default function HomePage() {
         return res.json();
       })
       .then((data) => {
-        setLiveVehicle({ soc: data.soc, latitude: data.latitude, longitude: data.longitude });
+        setLiveSoc(data.soc);
         setSocError(null);
       })
       .catch((err) => setSocError(err instanceof Error ? err.message : "unknown_error"));
@@ -117,43 +100,6 @@ export default function HomePage() {
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
       <h1 className="text-xl font-bold text-ink">Charge Monitor</h1>
 
-      <Card>
-        <p className="text-xs text-ink-faint">
-          車両SOC {authStatus.vehicleName ? `(${authStatus.vehicleName})` : ""}
-        </p>
-        {socError ? (
-          <p className="mt-2 text-sm text-danger">取得に失敗しました（{socError}）</p>
-        ) : (
-          <p className="mt-2 text-4xl font-bold text-ink">
-            {liveVehicle !== null ? `${liveVehicle.soc}%` : "..."}
-          </p>
-        )}
-        <button onClick={fetchLiveSoc} className="mt-1 text-xs text-accent-text hover:underline">
-          更新
-        </button>
-      </Card>
-
-      {!isMeasuring && (
-        <Card className="flex flex-col gap-4 text-sm">
-          <LocationSelectField
-            latitude={liveVehicle?.latitude ?? null}
-            longitude={liveVehicle?.longitude ?? null}
-            value={locationOverride}
-            onChange={setLocationOverride}
-          />
-          <div>
-            <p className="mb-1 text-ink-dim">メモ</p>
-            <textarea
-              value={memo}
-              onChange={(e) => setMemo(e.target.value)}
-              placeholder="例: これから鎌倉旅行"
-              rows={2}
-              className="w-full resize-none rounded-chip border border-hairline bg-surface-raised px-3 py-1.5 text-sm text-ink"
-            />
-          </div>
-        </Card>
-      )}
-
       <div>
         <Button onClick={handleStart} disabled={starting || isMeasuring} className="w-full">
           {isMeasuring ? "計測中..." : starting ? "開始中..." : "計測開始"}
@@ -171,14 +117,35 @@ export default function HomePage() {
         )}
       </div>
 
-      <div>
-        <p className="mb-2 text-sm font-semibold text-ink-dim">最新セッション</p>
-        {latestSession ? (
-          <SessionSummaryCard session={latestSession} />
+      <Card>
+        <p className="text-xs text-ink-faint">
+          車両SOC {authStatus.vehicleName ? `(${authStatus.vehicleName})` : ""}
+        </p>
+        {socError ? (
+          <p className="mt-2 text-sm text-danger">取得に失敗しました（{socError}）</p>
         ) : (
-          <p className="text-sm text-ink-faint">まだ記録がありません</p>
+          <p className="mt-2 text-4xl font-bold text-ink">{liveSoc !== null ? `${liveSoc}%` : "..."}</p>
         )}
-      </div>
+        <button onClick={fetchLiveSoc} className="mt-1 text-xs text-accent-text hover:underline">
+          更新
+        </button>
+      </Card>
+
+      {!isMeasuring && (
+        <Card className="flex flex-col gap-4 text-sm">
+          <LocationSelectField value={locationOverride} onChange={setLocationOverride} />
+          <div>
+            <p className="mb-1 text-ink-dim">メモ</p>
+            <textarea
+              value={memo}
+              onChange={(e) => setMemo(e.target.value)}
+              placeholder="例: ドライブ前"
+              rows={2}
+              className="w-full resize-none rounded-chip border border-hairline bg-surface-raised px-3 py-1.5 text-sm text-ink"
+            />
+          </div>
+        </Card>
+      )}
     </div>
   );
 }
