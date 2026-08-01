@@ -1,8 +1,7 @@
-// The browser-facing login/consent page stays on auth.tesla.com, but Tesla moved
-// the server-to-server /token endpoint (code exchange, refresh, client_credentials)
-// to a dedicated host — confirmed against live Tesla Fleet API docs.
 export const TESLA_AUTHORIZE_URL = "https://auth.tesla.com/oauth2/v3/authorize";
-export const TESLA_TOKEN_URL = "https://fleet-auth.prd.vn.cloud.tesla.com/oauth2/v3/token";
+// Verified against a real, confirmed-working request (a public Tesla developer's
+// working na/eu client_credentials call) — auth.tesla.com is correct for /token too.
+export const TESLA_TOKEN_URL = "https://auth.tesla.com/oauth2/v3/token";
 
 /**
  * We only ever read data — no vehicle_cmds/vehicle_charging_cmds scope is requested
