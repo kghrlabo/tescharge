@@ -1,4 +1,8 @@
-export const TESLA_AUTH_BASE_URL = "https://auth.tesla.com/oauth2/v3";
+// The browser-facing login/consent page stays on auth.tesla.com, but Tesla moved
+// the server-to-server /token endpoint (code exchange, refresh, client_credentials)
+// to a dedicated host — confirmed against live Tesla Fleet API docs.
+export const TESLA_AUTHORIZE_URL = "https://auth.tesla.com/oauth2/v3/authorize";
+export const TESLA_TOKEN_URL = "https://fleet-auth.prd.vn.cloud.tesla.com/oauth2/v3/token";
 
 /**
  * We only ever read data — no vehicle_cmds/vehicle_charging_cmds scope is requested
@@ -21,13 +25,7 @@ export const teslaEnv = {
  * Fleet API is regionalized. These are the two public regions (China is served
  * separately and out of scope here). The correct one for the signed-in account is
  * discovered once at OAuth-callback time and cached in the session — see
- * `resolveFleetApiBaseUrl` in `client.ts`.
- *
- * NOTE: verify these hostnames and the region-discovery endpoint path against the
- * live developer.tesla.com docs once a real Developer account exists — they could
- * not be fetched directly while writing this (developer.tesla.com blocked automated
- * fetches), so this is implemented from best available knowledge and should be the
- * first thing double-checked during Phase 0 real-account integration testing.
+ * `resolveFleetApiBaseUrl` in `client.ts`. Confirmed against live Tesla Fleet API docs.
  */
 export const FLEET_API_REGIONS = {
   na: "https://fleet-api.prd.na.vn.cloud.tesla.com",

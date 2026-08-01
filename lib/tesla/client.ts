@@ -1,5 +1,6 @@
 import {
-  TESLA_AUTH_BASE_URL,
+  TESLA_AUTHORIZE_URL,
+  TESLA_TOKEN_URL,
   TESLA_SCOPES,
   teslaEnv,
   FLEET_API_REGIONS,
@@ -31,7 +32,7 @@ export function buildAuthorizeUrl(state: string): string {
     scope: TESLA_SCOPES.join(" "),
     state,
   });
-  return `${TESLA_AUTH_BASE_URL}/authorize?${params.toString()}`;
+  return `${TESLA_AUTHORIZE_URL}?${params.toString()}`;
 }
 
 export async function exchangeCodeForToken(
@@ -40,7 +41,7 @@ export async function exchangeCodeForToken(
 ): Promise<TeslaTokenResponse> {
   if (useFakeTeslaApi) return fakeExchangeCodeForToken(fakeScenarioId);
 
-  const res = await fetch(`${TESLA_AUTH_BASE_URL}/token`, {
+  const res = await fetch(TESLA_TOKEN_URL, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
@@ -49,8 +50,6 @@ export async function exchangeCodeForToken(
       client_secret: teslaEnv.clientSecret,
       code,
       redirect_uri: teslaEnv.redirectUri,
-      // Best-effort default — see config.ts note on region/audience; verify against
-      // live Tesla docs once a real Developer account exists.
       audience: FLEET_API_REGIONS.na,
     }),
   });
@@ -68,7 +67,7 @@ export async function refreshAccessToken(
 ): Promise<TeslaTokenResponse> {
   if (useFakeTeslaApi) return fakeRefreshAccessToken();
 
-  const res = await fetch(`${TESLA_AUTH_BASE_URL}/token`, {
+  const res = await fetch(TESLA_TOKEN_URL, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
