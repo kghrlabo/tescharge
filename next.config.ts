@@ -1,17 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  async headers() {
+  async rewrites() {
     return [
       {
-        // Tesla Fleet API domain verification key — must be served as text/plain.
+        // Vercel's static-asset CDN 404s on dot-prefixed path segments (.well-known),
+        // so the key is served by an actual route handler instead of a public/ file.
         source: "/.well-known/appspecific/com.tesla.3p.public-key.pem",
-        headers: [
-          {
-            key: "Content-Type",
-            value: "text/plain",
-          },
-        ],
+        destination: "/api/tesla-public-key",
       },
     ];
   },
