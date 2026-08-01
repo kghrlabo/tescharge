@@ -6,24 +6,34 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { SessionSummaryCard } from "@/components/session/SessionSummaryCard";
+import { LocationSelectField } from "@/components/measure/LocationSelectField";
 import { useChargeSession } from "@/lib/polling/ChargeSessionContext";
 import { chargeSessionRepository } from "@/lib/db/repositories";
 import type { ChargeSession } from "@/lib/db/models";
+import type { LocationOverride } from "@/lib/polling/chargeStateMachine";
 
 interface AuthStatus {
   connected: boolean;
   vehicleName: string | null;
 }
 
+interface LiveVehicleState {
+  soc: number;
+  latitude: number | null;
+  longitude: number | null;
+}
+
 export default function HomePage() {
   const router = useRouter();
   const { state, startMeasurement } = useChargeSession();
   const [authStatus, setAuthStatus] = useState<AuthStatus | null>(null);
-  const [liveSoc, setLiveSoc] = useState<number | null>(null);
+  const [liveVehicle, setLiveVehicle] = useState<LiveVehicleState | null>(null);
   const [socError, setSocError] = useState<string | null>(null);
   const [latestSession, setLatestSession] = useState<ChargeSession | null>(null);
   const [starting, setStarting] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
+  const [locationOverride, setLocationOverride] = useState<LocationOverride | null>(null);
+  const [memo, setMemo] = useState("");
 
   useEffect(() => {
     fetch("/api/auth/status")
@@ -51,7 +61,7 @@ export default function HomePage() {
         return res.json();
       })
       .then((data) => {
-        setLiveSoc(data.soc);
+        setLiveVehicle({ soc: data.soc, latitude: data.latitude, longitude: data.longitude });
         setSocError(null);
       })
       .catch((err) => setSocError(err instanceof Error ? err.message : "unknown_error"));
@@ -69,7 +79,10 @@ export default function HomePage() {
     setStarting(true);
     setStartError(null);
     try {
-      const result = await startMeasurement();
+      const result = await startMeasurement({
+        locationOverride,
+        memo: memo.trim() || null,
+      });
       if (result.ok) {
         router.push("/measure");
       } else {
@@ -111,12 +124,35 @@ export default function HomePage() {
         {socError ? (
           <p className="mt-2 text-sm text-danger">取得に失敗しました（{socError}）</p>
         ) : (
-          <p className="mt-2 text-4xl font-bold text-ink">{liveSoc !== null ? `${liveSoc}%` : "..."}</p>
+          <p className="mt-2 text-4xl font-bold text-ink">
+            {liveVehicle !== null ? `${liveVehicle.soc}%` : "..."}
+          </p>
         )}
         <button onClick={fetchLiveSoc} className="mt-1 text-xs text-accent-text hover:underline">
           更新
         </button>
       </Card>
+
+      {!isMeasuring && (
+        <Card className="flex flex-col gap-4 text-sm">
+          <LocationSelectField
+            latitude={liveVehicle?.latitude ?? null}
+            longitude={liveVehicle?.longitude ?? null}
+            value={locationOverride}
+            onChange={setLocationOverride}
+          />
+          <div>
+            <p className="mb-1 text-ink-dim">メモ</p>
+            <textarea
+              value={memo}
+              onChange={(e) => setMemo(e.target.value)}
+              placeholder="例: これから鎌倉旅行"
+              rows={2}
+              className="w-full resize-none rounded-chip border border-hairline bg-surface-raised px-3 py-1.5 text-sm text-ink"
+            />
+          </div>
+        </Card>
+      )}
 
       <div>
         <Button onClick={handleStart} disabled={starting || isMeasuring} className="w-full">

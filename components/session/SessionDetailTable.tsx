@@ -49,6 +49,7 @@ export function SessionDetailTable({
         />
         <Row label="開始時刻" value={formatDateTime(session.startedAt)} />
         <Row label="終了時刻" value={session.endedAt ? formatDateTime(session.endedAt) : "-"} />
+        <Row label="メモ" value={session.memo ?? "-"} />
         <Row label="平均充電速度" value={session.avgKw != null ? formatKw(session.avgKw) : "-"} />
         <Row
           label="総充電量"

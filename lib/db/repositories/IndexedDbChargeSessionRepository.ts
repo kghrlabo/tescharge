@@ -15,6 +15,7 @@ export class IndexedDbChargeSessionRepository implements ChargeSessionRepository
       status: "waiting",
       startedAt: input.startedAt,
       endedAt: null,
+      memo: input.memo,
       startSoc: input.startSoc,
       endSoc: null,
       startOdometerKm: input.startOdometerKm,

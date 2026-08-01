@@ -84,6 +84,8 @@ export type ChargeMachineEvent =
       type: "START_PRESSED";
       sessionId: string;
       payload: ChargeStatusPayload;
+      /** carried over from the home screen's pre-start setup, if the user picked one. */
+      locationOverride: LocationOverride | null;
     }
   | { type: "POLL_SUCCESS"; payload: ChargeStatusPayload }
   | { type: "POLL_ERROR"; message: string }
@@ -116,7 +118,7 @@ export function chargeMachineReducer(
         status: "waitingForCable",
         sessionId: event.sessionId,
         startPayload: event.payload,
-        locationOverride: null,
+        locationOverride: event.locationOverride,
         chargeLimitSoc: event.payload.chargeLimitSoc,
         consecutiveErrors: 0,
         lastErrorMessage: null,

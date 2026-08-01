@@ -8,6 +8,8 @@ export interface ChargeSession {
   status: SessionStatus;
   startedAt: number;
   endedAt: number | null;
+  /** free-text note set once at start; null if left blank. */
+  memo: string | null;
   startSoc: number;
   endSoc: number | null;
   /** km */

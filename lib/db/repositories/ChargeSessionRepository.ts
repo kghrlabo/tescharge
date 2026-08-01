@@ -2,6 +2,7 @@ import type { ChargeSession, LogPoint, LocationType, AcOrDc } from "../models";
 
 export interface CreateSessionInput {
   startedAt: number;
+  memo: string | null;
   startSoc: number;
   startOdometerKm: number | null;
   startRangeKm: number | null;

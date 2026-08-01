@@ -173,37 +173,43 @@ export function useChargePolling() {
     };
   }, []);
 
-  const startMeasurement = useCallback(async (): Promise<
-    { ok: true } | { ok: false; error: string }
-  > => {
-    const settings = await settingsRepository.getSettings();
-    pollIntervalSecRef.current = settings.pollIntervalSec;
-    skipUntilRef.current = 0;
+  const startMeasurement = useCallback(
+    async (options: {
+      locationOverride: LocationOverride | null;
+      memo: string | null;
+    }): Promise<{ ok: true } | { ok: false; error: string }> => {
+      const settings = await settingsRepository.getSettings();
+      pollIntervalSecRef.current = settings.pollIntervalSec;
+      skipUntilRef.current = 0;
 
-    const result = await fetchChargeStatus();
-    if (!result.ok) {
-      return { ok: false, error: result.error };
-    }
+      const result = await fetchChargeStatus();
+      if (!result.ok) {
+        return { ok: false, error: result.error };
+      }
 
-    const payload = result.payload;
-    const session = await chargeSessionRepository.createSession({
-      startedAt: payload.timestamp,
-      startSoc: payload.soc,
-      startOdometerKm: milesToKm(payload.odometerMiles),
-      startRangeKm: milesToKm(payload.rangeMiles),
-      startOutsideTempC: payload.outsideTempC,
-      startLat: payload.latitude,
-      startLng: payload.longitude,
-      pollIntervalSec: settings.pollIntervalSec,
-    });
+      const payload = result.payload;
+      const session = await chargeSessionRepository.createSession({
+        startedAt: payload.timestamp,
+        memo: options.memo,
+        startSoc: payload.soc,
+        startOdometerKm: milesToKm(payload.odometerMiles),
+        startRangeKm: milesToKm(payload.rangeMiles),
+        startOutsideTempC: payload.outsideTempC,
+        startLat: payload.latitude,
+        startLng: payload.longitude,
+        pollIntervalSec: settings.pollIntervalSec,
+      });
 
-    dispatch({
-      type: "START_PRESSED",
-      sessionId: session.id,
-      payload,
-    });
-    return { ok: true };
-  }, []);
+      dispatch({
+        type: "START_PRESSED",
+        sessionId: session.id,
+        payload,
+        locationOverride: options.locationOverride,
+      });
+      return { ok: true };
+    },
+    []
+  );
 
   const changeLocationOverride = useCallback((value: LocationOverride | null) => {
     dispatch({ type: "LOCATION_OVERRIDE_CHANGED", value });
