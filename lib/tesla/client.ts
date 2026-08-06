@@ -115,7 +115,7 @@ export async function listVehicles(
   const res = await fetch(`${fleetApiBaseUrl}/api/1/vehicles`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
-  if (!res.ok) throw mapErrorResponse(res);
+  if (!res.ok) throw await mapErrorResponse(res);
   const data = await res.json();
   return data.response as TeslaVehicleListItem[];
 }
@@ -131,7 +131,7 @@ export async function wakeUp(
     `${fleetApiBaseUrl}/api/1/vehicles/${vehicleId}/wake_up`,
     { method: "POST", headers: { Authorization: `Bearer ${accessToken}` } }
   );
-  if (!res.ok) throw mapErrorResponse(res);
+  if (!res.ok) throw await mapErrorResponse(res);
 }
 
 export async function getVehicleData(
@@ -146,7 +146,7 @@ export async function getVehicleData(
     `${fleetApiBaseUrl}/api/1/vehicles/${vehicleId}/vehicle_data?endpoints=${endpoints}`,
     { headers: { Authorization: `Bearer ${accessToken}` } }
   );
-  if (!res.ok) throw mapErrorResponse(res);
+  if (!res.ok) throw await mapErrorResponse(res);
   const data = await res.json();
   return data.response as TeslaVehicleData;
 }
@@ -186,11 +186,12 @@ export async function ensureAwakeAndGetVehicleData(
     : new TeslaApiError("Vehicle did not wake up in time", 408);
 }
 
-function mapErrorResponse(res: Response): TeslaApiError {
+async function mapErrorResponse(res: Response): Promise<TeslaApiError> {
   if (res.status === 401) return new TeslaAuthError();
   if (res.status === 429) return new TeslaRateLimitError();
   if (res.status === 408) return new VehicleAsleepError();
-  return new TeslaApiError(`Tesla API error: ${res.status}`, res.status);
+  const body = await safeText(res);
+  return new TeslaApiError(`Tesla API error: ${res.status} ${body}`, res.status);
 }
 
 async function safeText(res: Response): Promise<string> {
