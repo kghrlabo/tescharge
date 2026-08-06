@@ -50,9 +50,17 @@ export async function GET(request: NextRequest) {
     await session.save();
 
     return NextResponse.redirect(new URL("/settings?connected=1", request.url));
-  } catch {
-    return NextResponse.redirect(
-      new URL("/settings?error=tesla_connect_failed", request.url)
-    );
+  } catch (err) {
+    // Temporary diagnostic detail — surfaced in the URL so it's visible without
+    // paid Vercel log access. Safe to include: never touches tokens/secrets,
+    // only the thrown error's own message/status.
+    const detail =
+      err instanceof Error
+        ? `${err.name}: ${err.message}`
+        : "unknown error";
+    const url = new URL("/settings", request.url);
+    url.searchParams.set("error", "tesla_connect_failed");
+    url.searchParams.set("detail", detail);
+    return NextResponse.redirect(url);
   }
 }

@@ -20,6 +20,7 @@ interface AuthStatus {
 function ConnectionBanner() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
+  const detail = searchParams.get("detail");
   const connected = searchParams.get("connected");
 
   if (!error && !connected) return null;
@@ -27,6 +28,7 @@ function ConnectionBanner() {
   return error ? (
     <p className="rounded-card bg-danger/15 p-3 text-sm text-danger">
       接続でエラーが発生しました（{error}）
+      {detail && <span className="mt-1 block break-all text-xs">{detail}</span>}
     </p>
   ) : (
     <p className="rounded-card bg-glow/15 p-3 text-sm text-glow-text">
