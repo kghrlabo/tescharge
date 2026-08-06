@@ -5,11 +5,42 @@ import {
   resolveFleetApiBaseUrl,
   listVehicles,
 } from "@/lib/tesla/client";
+import { FLEET_API_REGIONS } from "@/lib/tesla/config";
 import { getSession } from "@/lib/session/cookie";
 
 export const runtime = "nodejs";
 
 const STATE_COOKIE = "tescharge_oauth_state";
+
+/**
+ * TEMPORARY DIAGNOSTIC: client_credentials keeps failing with invalid_audience
+ * for reasons we haven't pinned down, so try registering this app as a Fleet API
+ * partner using the user's own OAuth access token instead, for both regions.
+ * Safe to call repeatedly — Tesla's partner_accounts endpoint is idempotent for
+ * an already-registered domain.
+ */
+async function tryRegisterPartnerAccount(
+  accessToken: string,
+  domain: string
+): Promise<string> {
+  const results: string[] = [];
+  for (const [region, base] of Object.entries(FLEET_API_REGIONS)) {
+    try {
+      const res = await fetch(`${base}/api/1/partner_accounts`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ domain }),
+      });
+      results.push(`${region}:${res.status} ${await res.text()}`);
+    } catch (e) {
+      results.push(`${region}:threw ${e instanceof Error ? e.message : String(e)}`);
+    }
+  }
+  return results.join(" | ");
+}
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -27,8 +58,14 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  let partnerRegResult = "not attempted";
+
   try {
     const tokens = await exchangeCodeForToken(code, scenario);
+    partnerRegResult = await tryRegisterPartnerAccount(
+      tokens.access_token,
+      request.nextUrl.hostname
+    );
     const fleetApiBaseUrl = await resolveFleetApiBaseUrl(tokens.access_token);
     const vehicles = await listVehicles(tokens.access_token, fleetApiBaseUrl);
     const vehicle = vehicles[0];
@@ -61,6 +98,7 @@ export async function GET(request: NextRequest) {
     const url = new URL("/settings", request.url);
     url.searchParams.set("error", "tesla_connect_failed");
     url.searchParams.set("detail", detail);
+    url.searchParams.set("partnerReg", partnerRegResult);
     return NextResponse.redirect(url);
   }
 }
